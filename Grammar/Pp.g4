@@ -3,7 +3,9 @@
 // Eduardo Enrique Trujillo Ramos - A01187313
 // Hugo Oswaldo Garcia Perez      - A00815354
 
-grammar Pp ;
+grammar Pp;
+
+r : program0 ;
 
 // Regular Expressions
 
