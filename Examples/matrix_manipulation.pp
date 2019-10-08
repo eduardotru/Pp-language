@@ -1,4 +1,5 @@
 let matrix<float>[3][3] A, B;
+let int i, j;
 
 A = [
   [1,2,3],
@@ -6,7 +7,6 @@ A = [
   [0., 1, 10]
 ];
 
-let int i, j;
 i = 0;
 
 while (i < 3) {
@@ -19,3 +19,5 @@ while (i < 3) {
 }
 
 B = A*B;
+
+B = B^4;
