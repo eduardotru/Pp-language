@@ -1,4 +1,4 @@
-# Avance de Analisis lexico y sintactico
+# Avance de Análisis léxico y sintáctico
 La gramática funciona para los ejemplos en la carpeta Examples. Estos ejemplos
 son cortos pero extensivos para tocar los siguientes aspectos:
 - Declaración de variables
