@@ -16,5 +16,8 @@ func int fibonacci (int n) {
 
 write("Which Fibonacci number do you want?");
 read(fib);
-
-write(fibonacci(fib));
+if (fib < 0) {
+  write("Invalid number");
+} else {
+  write(fibonacci(fib));
+}
