@@ -13,19 +13,23 @@ ID : '_'?[a-zA-Z][a-zA-Z0-9_]* ;
 INT_NUMBER : [+|-]?[0-9]+ ;
 FLOAT_NUMBER : [+|-]?[0-9]+'.'([0-9]+)?('E'[+|-]?[0-9]+)? ;
 STRING_LITERAL : '"'.*?'"' ;
+BOOL_LITERAL : 'true' | 'false' ;
 WS : [\t\r\n ]+ -> skip ;
 
 // Grammar
 
 program0 :
-  statement0 program0
-  | function_decl0 program0
+  variable_decl0 program1
+  | program1
+  ;
+program1 :
+  statement0 program1
+  | function_decl0 program1
   | // empty
   ;
 
 statement0 :
-  variable_decl0
-  | assignment0
+  assignment0
   | function_call0
   | io_statement0
   | if0
@@ -43,7 +47,16 @@ block1 :
   ;
 
 function_decl0 :
-  'func' type0 ID '(' parameters0 ')' block0
+  'func' type0 ID '(' parameters0 ')' decl_block0
+  ;
+
+decl_block0 :
+  '{' variable_decl0 decl_block1 '}'
+  ;
+
+decl_block1 :
+  statement0 decl_block1
+  | // empty
   ;
 
 parameters0 :
@@ -56,7 +69,8 @@ parameters1 :
   ;
 
 variable_decl0 :
-  'let' type0 ID variables_decl1 ';'
+  'let' type0 ID variables_decl1 ';' variable_decl0
+  | // empty
   ;
 
 variables_decl1 :
@@ -131,13 +145,11 @@ return0 :
 expression0 :
   STRING_LITERAL
   | bool_exp0
-  | arithmetic_exp0
   ;
 
 bool_exp0 :
-  bool_term0 bool_exp1
+  | bool_term0 bool_exp1
   | 'not' bool_exp0 bool_exp1
-  | arithmetic_exp0 rel_op0 arithmetic_exp0 bool_exp1
   ;
 
 bool_exp1 :
@@ -148,10 +160,12 @@ bool_exp1 :
 // X -> Xa | b => X -> bX', X' -> aX' | eps;
 
 bool_term0 :
-  'true'
-  | 'false'
-  | value0
-  | function_call_aux0
+  arithmetic_exp0 bool_term1
+  ;
+
+bool_term1 :
+  rel_op0 arithmetic_exp0
+  | // empty
   ;
 
 bool_op0 :
@@ -171,19 +185,53 @@ rel_op0 :
   ;
 
 arithmetic_exp0 :
-  numeric_term0 arithmetic_exp1
-  |  '(' arithmetic_exp0 ')' arithmetic_exp1
+  arithmetic_factor0 arithmetic_exp1
   ;
 
 arithmetic_exp1 :
-  math_op0 arithmetic_exp0 arithmetic_exp1
+  addition_subtraction0 arithmetic_factor0 arithmetic_exp1
   | // empty
+  ;
+
+addition_subtraction0 :
+  '+'
+  | '-'
+  ;
+
+arithmetic_factor0 :
+  arithmetic_term0 arithmetic_factor1
+  ;
+
+arithmetic_factor1 :
+  multiplication_division0 arithmetic_term0 arithmetic_factor1
+  | // empty
+  ;
+
+multiplication_division0 :
+  '*'
+  | '/'
+  | '%'
+  ;
+
+arithmetic_term0 :
+  numeric_term0 arithmetic_term1
+  ;
+  
+arithmetic_term1 :
+  exponent0 numeric_term0
+  | // empty
+  ;
+
+exponent0 :
+  '^'
   ;
 
 numeric_term0 :
   sign0 numeric_term1
   | INT_NUMBER
   | FLOAT_NUMBER
+  | BOOL_LITERAL
+  |  '(' bool_exp0 ')'
   ;
 
 numeric_term1 :
@@ -195,15 +243,6 @@ numeric_term1 :
 sign0 :
   '-'
   | // empty
-  ;
-
-math_op0 :
-  '+'
-  | '-'
-  | '*'
-  | '/'
-  | '%'
-  | '^'
   ;
 
 type0 :
