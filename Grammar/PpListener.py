@@ -13,6 +13,9 @@ class PpListener(ParseTreeListener):
         self.semantic_cube = semantic_cube
         self.current_scope = "global"
         self.current_type = None
+        self.func_parameters = []
+        self.func_name = ""
+        self.func_type = ""
 
     # Enter a parse tree produced by PpParser#r.
     def enterR(self, ctx:PpParser.RContext):
@@ -71,10 +74,9 @@ class PpListener(ParseTreeListener):
     # Enter a parse tree produced by PpParser#function_decl0.
     def enterFunction_decl0(self, ctx:PpParser.Function_decl0Context):
         self.current_scope = ctx.ID()
-        try:
-            self.symbols_table.add_function(ctx.ID(), ctx.type0().getText(), [])
-        except Exception:
-            print(f"Semantic error: Redefinition of function {ctx.ID()} in line {ctx.start}")
+        self.func_name = ctx.ID()
+        self.func_type = ctx.type0().getText()
+        self.func_parameters = []
 
     # Exit a parse tree produced by PpParser#function_decl0.
     def exitFunction_decl0(self, ctx:PpParser.Function_decl0Context):
@@ -84,7 +86,10 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#decl_block0.
     def enterDecl_block0(self, ctx:PpParser.Decl_block0Context):
-        pass
+        try:
+            self.symbols_table.add_function(self.func_name, self.func_type, self.func_parameters)
+        except Exception:
+            print(f"Semantic error: Redefinition of function {self.func_name} in line {ctx.start}")
 
     # Exit a parse tree produced by PpParser#decl_block0.
     def exitDecl_block0(self, ctx:PpParser.Decl_block0Context):
@@ -102,7 +107,7 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#parameters0.
     def enterParameters0(self, ctx:PpParser.Parameters0Context):
-        pass
+        self.func_parameters.append((ctx.type0().getText(), ctx.ID()))
 
     # Exit a parse tree produced by PpParser#parameters0.
     def exitParameters0(self, ctx:PpParser.Parameters0Context):
