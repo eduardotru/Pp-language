@@ -8,6 +8,12 @@ else:
 # This class defines a complete listener for a parse tree produced by PpParser.
 class PpListener(ParseTreeListener):
 
+    def __init__(self, symbols_table, semantic_cube):
+        self.symbols_table = symbols_table
+        self.semantic_cube = semantic_cube
+        self.current_scope = "global"
+        self.current_type = None
+
     # Enter a parse tree produced by PpParser#r.
     def enterR(self, ctx:PpParser.RContext):
         pass
@@ -64,10 +70,15 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#function_decl0.
     def enterFunction_decl0(self, ctx:PpParser.Function_decl0Context):
-        pass
+        self.current_scope = ctx.ID()
+        try:
+            self.symbols_table.add_function(ctx.ID(), ctx.type0().getText(), [])
+        except Exception:
+            print(f"Semantic error: Redefinition of function {ctx.ID()} in line {ctx.start}")
 
     # Exit a parse tree produced by PpParser#function_decl0.
     def exitFunction_decl0(self, ctx:PpParser.Function_decl0Context):
+        self.current_scope = "global"
         pass
 
 
@@ -109,7 +120,13 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#variable_decl0.
     def enterVariable_decl0(self, ctx:PpParser.Variable_decl0Context):
-        pass
+        if ctx.ID() is None:
+            return
+        self.current_type = ctx.type0().getText()
+        try:
+            self.symbols_table.add_variable(ctx.ID(), self.current_type, self.current_scope)
+        except Exception:
+            print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in line {ctx.start}")
 
     # Exit a parse tree produced by PpParser#variable_decl0.
     def exitVariable_decl0(self, ctx:PpParser.Variable_decl0Context):
@@ -118,7 +135,12 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#variables_decl1.
     def enterVariables_decl1(self, ctx:PpParser.Variables_decl1Context):
-        pass
+        if ctx.ID() is None:
+            return
+        try:
+            self.symbols_table.add_variable(ctx.ID(), self.current_type, self.current_scope)
+        except Exception:
+            print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in line {ctx.start}")
 
     # Exit a parse tree produced by PpParser#variables_decl1.
     def exitVariables_decl1(self, ctx:PpParser.Variables_decl1Context):
@@ -145,7 +167,8 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#function_call_aux0.
     def enterFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
-        pass
+        if not self.symbols_table.exists_function(ctx.ID(), []):
+            print(f"Semantic error: Use of undeclared function {ctx.ID()}")
 
     # Exit a parse tree produced by PpParser#function_call_aux0.
     def exitFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
@@ -451,7 +474,8 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#value0.
     def enterValue0(self, ctx:PpParser.Value0Context):
-        pass
+        if not self.symbols_table.exists_variable(ctx.ID(), self.current_scope):
+            print(f"Semantic error: Use of undefined variable {ctx.ID()}")
 
     # Exit a parse tree produced by PpParser#value0.
     def exitValue0(self, ctx:PpParser.Value0Context):
