@@ -7,6 +7,7 @@ else:
 
 GLOBAL_SCOPE = "program"
 
+from SymbolsTable import BasicTypes, Variable
 
 # This class defines a complete listener for a parse tree produced by PpParser.
 class PpListener(ParseTreeListener):
@@ -111,7 +112,9 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#parameters0.
     def enterParameters0(self, ctx:PpParser.Parameters0Context):
-        self.func_parameters.append((ctx.type0().getText(), ctx.ID()))
+        self.func_parameters.append(
+            Variable(ctx.ID(), BasicTypes(ctx.type0().getText()), self.current_scope)
+        )
 
     # Exit a parse tree produced by PpParser#parameters0.
     def exitParameters0(self, ctx:PpParser.Parameters0Context):
@@ -133,7 +136,11 @@ class PpListener(ParseTreeListener):
             return
         self.current_type = ctx.type0().getText()
         try:
-            self.symbols_table.add_variable(ctx.ID(), self.current_type, self.current_scope)
+            self.symbols_table.add_variable(
+                ctx.ID(),
+                BasicTypes(self.current_type),
+                self.current_scope,
+            )
         except Exception:
             print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in "
                 f"line {ctx.start.line}")
@@ -148,7 +155,11 @@ class PpListener(ParseTreeListener):
         if ctx.ID() is None:
             return
         try:
-            self.symbols_table.add_variable(ctx.ID(), self.current_type, self.current_scope)
+            self.symbols_table.add_variable(
+                ctx.ID(),
+                BasicTypes(self.current_type),
+                self.current_scope
+            )
         except Exception:
             print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in "
                     f"line {ctx.start.line}")
