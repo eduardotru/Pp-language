@@ -92,7 +92,8 @@ class PpListener(ParseTreeListener):
         try:
             self.symbols_table.add_function(self.func_name, self.func_type, self.func_parameters)
         except Exception:
-            print(f"Semantic error: Redefinition of function {self.func_name} in line {ctx.start}")
+            print(f"Semantic error: Redefinition of function {self.func_name}"
+                f"in line {ctx.start.line}")
 
     # Exit a parse tree produced by PpParser#decl_block0.
     def exitDecl_block0(self, ctx:PpParser.Decl_block0Context):
@@ -134,7 +135,8 @@ class PpListener(ParseTreeListener):
         try:
             self.symbols_table.add_variable(ctx.ID(), self.current_type, self.current_scope)
         except Exception:
-            print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in line {ctx.start}")
+            print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in "
+                f"line {ctx.start.line}")
 
     # Exit a parse tree produced by PpParser#variable_decl0.
     def exitVariable_decl0(self, ctx:PpParser.Variable_decl0Context):
@@ -148,7 +150,8 @@ class PpListener(ParseTreeListener):
         try:
             self.symbols_table.add_variable(ctx.ID(), self.current_type, self.current_scope)
         except Exception:
-            print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in line {ctx.start}")
+            print(f"Semantic error: Redefinition of variable '{ctx.ID()}' in "
+                    f"line {ctx.start.line}")
 
     # Exit a parse tree produced by PpParser#variables_decl1.
     def exitVariables_decl1(self, ctx:PpParser.Variables_decl1Context):
