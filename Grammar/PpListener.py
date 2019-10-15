@@ -5,13 +5,16 @@ if __name__ is not None and "." in __name__:
 else:
     from PpParser import PpParser
 
+GLOBAL_SCOPE = "program"
+
+
 # This class defines a complete listener for a parse tree produced by PpParser.
 class PpListener(ParseTreeListener):
 
     def __init__(self, symbols_table, semantic_cube):
         self.symbols_table = symbols_table
         self.semantic_cube = semantic_cube
-        self.current_scope = "global"
+        self.current_scope = GLOBAL_SCOPE
         self.current_type = None
         self.func_parameters = []
         self.func_name = ""
@@ -80,7 +83,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#function_decl0.
     def exitFunction_decl0(self, ctx:PpParser.Function_decl0Context):
-        self.current_scope = "global"
+        self.current_scope = GLOBAL_SCOPE
         pass
 
 
