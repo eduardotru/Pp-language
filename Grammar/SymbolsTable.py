@@ -54,7 +54,7 @@ class SymbolsTable:
                 name, data_type, scope)
 
     def exists_variable(self, name, scope):
-        if name in self.functions[scope]:
+        if name in self.functions[scope].variables or name in self.functions["program"].variables:
             return True
         return False
 
@@ -72,10 +72,3 @@ class SymbolsTable:
 
         ret += "===========================================\n"
         return ret
-
-
-hue = SymbolsTable()
-hue.add_function("hola", BasicTypes.VOID, [
-                 Variable("name", BasicTypes.VOID, "hola")])
-hue.add_variable("vari", BasicTypes.FLOAT, "hola")
-print(hue)
