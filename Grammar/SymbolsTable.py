@@ -37,7 +37,7 @@ class SymbolsTable:
                 name, return_type, parameters)
             for parameter in parameters:
                 self.add_variable(
-                    parameter["name"], parameter["type"], name)
+                    parameter.name, parameter.type, name)
 
     def exists_function(self, name, parameters):
         if name in self.functions:
@@ -47,10 +47,11 @@ class SymbolsTable:
     def add_variable(self, name, data_type, scope):
         if scope not in self.functions:
             raise Exception("The scope does not exists.")
-        if name in self.functions[scope]:
+        if name in self.functions[scope].variables:
             raise Exception("The variable already exists in this scope.")
         else:
-            self.functions[scope][name] = Variable(name, data_type, scope)
+            self.functions[scope].variables[name] = Variable(
+                name, data_type, scope)
 
     def exists_variable(self, name, scope):
         if name in self.functions[scope]:
@@ -73,6 +74,6 @@ class SymbolsTable:
 
 
 hue = SymbolsTable()
-hue.add_function("hola", BasicTypes.VOID, {
-                 "name": {"name": "hue", "type": BasicTypes.INT}})
+hue.add_function("hola", BasicTypes.VOID, [
+                 Variable("name", BasicTypes.VOID, "hola")])
 print(hue)
