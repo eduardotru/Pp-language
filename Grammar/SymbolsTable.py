@@ -34,7 +34,7 @@ class SymbolsTable:
             raise Exception("The function already exists.")
         else:
             self.functions[name] = Function(
-                name, return_type, parameters)
+                name, return_type, {})
             for parameter in parameters:
                 self.add_variable(
                     parameter.name, parameter.type, name)
@@ -59,21 +59,23 @@ class SymbolsTable:
         return False
 
     def __str__(self):
-        print("===============SYMBOLS=TABLE===============")
+        ret = "===============SYMBOLS=TABLE===============\n"
         for i in self.functions:
             func = self.functions[i]
-            print("-----> ", func.name, " : ", func.return_type)
+            ret += "-----> " + func.name + " : " + func.return_type.value + "\n"
             for j in self.functions[func.name].variables:
                 variable = self.functions[func.name].variables[j]
-                print("NAME: ", variable.name)
-                print("TYPE: ", variable.type)
-                print("")
+                ret += "NAME: " + variable.name + "\n"
+                ret += "TYPE: " + variable.type.value + "\n\n"
 
-        print("===========================================")
-        print("")
+            ret += "\n"
+
+        ret += "===========================================\n"
+        return ret
 
 
 hue = SymbolsTable()
 hue.add_function("hola", BasicTypes.VOID, [
                  Variable("name", BasicTypes.VOID, "hola")])
+hue.add_variable("vari", BasicTypes.FLOAT, "hola")
 print(hue)
