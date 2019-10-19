@@ -47,7 +47,7 @@ block1 :
   ;
 
 function_decl0 :
-  'func' type0 ID '(' parameters0 ')' decl_block0
+  'func' type0 ID '(' parameters_or_empty0 ')' decl_block0
   ;
 
 decl_block0 :
@@ -56,6 +56,11 @@ decl_block0 :
 
 decl_block1 :
   statement0 decl_block1
+  | // empty
+  ;
+
+parameters_or_empty0:
+  parameters0
   | // empty
   ;
 
@@ -91,12 +96,12 @@ function_call_aux0 :
   ;
 
 function_call_aux1 :
-  ID function_call_aux2
+  expression0 function_call_aux2
   | // empty
   ;
 
 function_call_aux2 :
-  ',' ID function_call_aux2
+  ',' expression0 function_call_aux2
   | // empty
   ;
 
@@ -236,6 +241,7 @@ numeric_term0 :
 
 numeric_term1 :
   value0
+  | stat_functions0
   | function_call_aux0
   | matrix_literal0
   ;
@@ -296,4 +302,182 @@ matrix_literal4 :
   | // empty
   ;
 
+stat_functions0 :
+  mean0
+  | median0
+  | mode0
+  | stdev0
+  | variance
+  | beta0
+  | binom0
+  | exp0
+  | gamma0
+  | geom0
+  | norm0
+  | pois0
+  | unif0
+  ;
 
+mean0 :
+  'mean' '(' expression0  ')'
+  ;
+
+median0 :
+  'median' '(' expression0  ')'
+  ;
+
+mode0 :
+  'mode' '(' expression0  ')'
+  ;
+
+stdev0 :
+  'stdev' '(' expression0  ')'
+  ;
+
+variance :
+  'variance' '(' expression0  ')'
+  ;
+
+beta0 :
+  dbeta0
+  | cbeta0
+  | rbeta0
+  ;
+
+dbeta0 :
+  'dbeta' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+cbeta0 :
+  'cbeta' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+rbeta0 :
+  'rbeta' '(' expression0 ',' expression0 ')'
+  ;
+
+binom0 :
+  dbinom0
+  | cbinom0
+  | rbinom0
+  ;
+
+dbinom0 :
+  'dbinom' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+cbinom0 :
+  'cbinom' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+rbinom0 :
+  'rbinom' '(' expression0 ',' expression0 ')'
+  ;
+
+exp0 :
+  dexp0
+  | cexp0
+  | rexp0
+  ;
+
+dexp0 :
+  'dexp' '(' expression0 ',' expression0 ')'
+  ;
+
+cexp0 :
+  'cexp' '(' expression0 ',' expression0 ')'
+  ;
+
+rexp0 :
+  'rexp' '(' expression0 ')'
+  ;
+
+gamma0 :
+  dgamma0
+  | cgamma0
+  | rgamma0
+  ;
+
+dgamma0 :
+  'dgamma' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+cgamma0 :
+  'cgamma' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+rgamma0 :
+  'rgamma' '(' expression0 ',' expression0 ')'
+  ;
+
+geom0 :
+  dgeom0
+  | cgeom0
+  | rgeom0
+  ;
+
+dgeom0 :
+  'dgeom' '(' expression0 ',' expression0 ')'
+  ;
+
+cgeom0 :
+  'cgeom' '(' expression0 ',' expression0 ')'
+  ;
+
+rgeom0:
+  'rgeom' '(' expression0 ')'
+  ;
+
+norm0 :
+  dnorm0
+  | cnorm0
+  | rnorm0
+  ;
+
+dnorm0 :
+  'dnorm' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+cnorm0 :
+  'cnorm' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+rnorm0 :
+  'rnorm' '(' expression0 ',' expression0 ')'
+  ;
+
+pois0 :
+  dpois0
+  | cpois0
+  | rpois0
+  ;
+
+dpois0 :
+  'dpois' '(' expression0 ',' expression0  ')'
+  ;
+
+cpois0 :
+  'cpois' '(' expression0 ',' expression0  ')'
+  ;
+
+rpois0 :
+  'rpois' '(' expression0  ')'
+  ;
+
+unif0 :
+  dunif0
+  | cunif0
+  | runif0
+  ;
+
+dunif0 :
+  'dunif' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+cunif0 :
+  'cunif' '(' expression0 ',' expression0 ',' expression0 ')'
+  ;
+
+runif0 :
+  'runif' '(' expression0 ',' expression0 ')'
+  ;

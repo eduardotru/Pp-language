@@ -5,9 +5,9 @@ if __name__ is not None and "." in __name__:
 else:
     from PpParser import PpParser
 
-GLOBAL_SCOPE = "program"
-
 from SymbolsTable import BasicTypes, Variable
+
+GLOBAL_SCOPE = "program"
 
 # This class defines a complete listener for a parse tree produced by PpParser.
 class PpListener(ParseTreeListener):
@@ -20,7 +20,7 @@ class PpListener(ParseTreeListener):
         self.func_parameters = []
         self.func_name = ""
         self.func_type = ""
-
+    
     # Enter a parse tree produced by PpParser#r.
     def enterR(self, ctx:PpParser.RContext):
         pass
@@ -81,11 +81,10 @@ class PpListener(ParseTreeListener):
         self.func_name = ctx.ID().getText()
         self.func_type = ctx.type0().getText()
         self.func_parameters = []
-
+    
     # Exit a parse tree produced by PpParser#function_decl0.
     def exitFunction_decl0(self, ctx:PpParser.Function_decl0Context):
         self.current_scope = GLOBAL_SCOPE
-        pass
 
 
     # Enter a parse tree produced by PpParser#decl_block0.
@@ -107,6 +106,15 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#decl_block1.
     def exitDecl_block1(self, ctx:PpParser.Decl_block1Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#parameters_or_empty0.
+    def enterParameters_or_empty0(self, ctx:PpParser.Parameters_or_empty0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#parameters_or_empty0.
+    def exitParameters_or_empty0(self, ctx:PpParser.Parameters_or_empty0Context):
         pass
 
 
@@ -556,6 +564,348 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#matrix_literal4.
     def exitMatrix_literal4(self, ctx:PpParser.Matrix_literal4Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#stat_functions0.
+    def enterStat_functions0(self, ctx:PpParser.Stat_functions0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#stat_functions0.
+    def exitStat_functions0(self, ctx:PpParser.Stat_functions0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#mean0.
+    def enterMean0(self, ctx:PpParser.Mean0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#mean0.
+    def exitMean0(self, ctx:PpParser.Mean0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#median0.
+    def enterMedian0(self, ctx:PpParser.Median0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#median0.
+    def exitMedian0(self, ctx:PpParser.Median0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#mode0.
+    def enterMode0(self, ctx:PpParser.Mode0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#mode0.
+    def exitMode0(self, ctx:PpParser.Mode0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#stdev0.
+    def enterStdev0(self, ctx:PpParser.Stdev0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#stdev0.
+    def exitStdev0(self, ctx:PpParser.Stdev0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#variance.
+    def enterVariance(self, ctx:PpParser.VarianceContext):
+        pass
+
+    # Exit a parse tree produced by PpParser#variance.
+    def exitVariance(self, ctx:PpParser.VarianceContext):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#beta0.
+    def enterBeta0(self, ctx:PpParser.Beta0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#beta0.
+    def exitBeta0(self, ctx:PpParser.Beta0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dbeta0.
+    def enterDbeta0(self, ctx:PpParser.Dbeta0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dbeta0.
+    def exitDbeta0(self, ctx:PpParser.Dbeta0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cbeta0.
+    def enterCbeta0(self, ctx:PpParser.Cbeta0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cbeta0.
+    def exitCbeta0(self, ctx:PpParser.Cbeta0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rbeta0.
+    def enterRbeta0(self, ctx:PpParser.Rbeta0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rbeta0.
+    def exitRbeta0(self, ctx:PpParser.Rbeta0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#binom0.
+    def enterBinom0(self, ctx:PpParser.Binom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#binom0.
+    def exitBinom0(self, ctx:PpParser.Binom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dbinom0.
+    def enterDbinom0(self, ctx:PpParser.Dbinom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dbinom0.
+    def exitDbinom0(self, ctx:PpParser.Dbinom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cbinom0.
+    def enterCbinom0(self, ctx:PpParser.Cbinom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cbinom0.
+    def exitCbinom0(self, ctx:PpParser.Cbinom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rbinom0.
+    def enterRbinom0(self, ctx:PpParser.Rbinom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rbinom0.
+    def exitRbinom0(self, ctx:PpParser.Rbinom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#exp0.
+    def enterExp0(self, ctx:PpParser.Exp0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#exp0.
+    def exitExp0(self, ctx:PpParser.Exp0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dexp0.
+    def enterDexp0(self, ctx:PpParser.Dexp0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dexp0.
+    def exitDexp0(self, ctx:PpParser.Dexp0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cexp0.
+    def enterCexp0(self, ctx:PpParser.Cexp0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cexp0.
+    def exitCexp0(self, ctx:PpParser.Cexp0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rexp0.
+    def enterRexp0(self, ctx:PpParser.Rexp0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rexp0.
+    def exitRexp0(self, ctx:PpParser.Rexp0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#gamma0.
+    def enterGamma0(self, ctx:PpParser.Gamma0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#gamma0.
+    def exitGamma0(self, ctx:PpParser.Gamma0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dgamma0.
+    def enterDgamma0(self, ctx:PpParser.Dgamma0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dgamma0.
+    def exitDgamma0(self, ctx:PpParser.Dgamma0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cgamma0.
+    def enterCgamma0(self, ctx:PpParser.Cgamma0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cgamma0.
+    def exitCgamma0(self, ctx:PpParser.Cgamma0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rgamma0.
+    def enterRgamma0(self, ctx:PpParser.Rgamma0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rgamma0.
+    def exitRgamma0(self, ctx:PpParser.Rgamma0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#geom0.
+    def enterGeom0(self, ctx:PpParser.Geom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#geom0.
+    def exitGeom0(self, ctx:PpParser.Geom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dgeom0.
+    def enterDgeom0(self, ctx:PpParser.Dgeom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dgeom0.
+    def exitDgeom0(self, ctx:PpParser.Dgeom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cgeom0.
+    def enterCgeom0(self, ctx:PpParser.Cgeom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cgeom0.
+    def exitCgeom0(self, ctx:PpParser.Cgeom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rgeom0.
+    def enterRgeom0(self, ctx:PpParser.Rgeom0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rgeom0.
+    def exitRgeom0(self, ctx:PpParser.Rgeom0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#norm0.
+    def enterNorm0(self, ctx:PpParser.Norm0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#norm0.
+    def exitNorm0(self, ctx:PpParser.Norm0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dnorm0.
+    def enterDnorm0(self, ctx:PpParser.Dnorm0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dnorm0.
+    def exitDnorm0(self, ctx:PpParser.Dnorm0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cnorm0.
+    def enterCnorm0(self, ctx:PpParser.Cnorm0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cnorm0.
+    def exitCnorm0(self, ctx:PpParser.Cnorm0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rnorm0.
+    def enterRnorm0(self, ctx:PpParser.Rnorm0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rnorm0.
+    def exitRnorm0(self, ctx:PpParser.Rnorm0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#pois0.
+    def enterPois0(self, ctx:PpParser.Pois0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#pois0.
+    def exitPois0(self, ctx:PpParser.Pois0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dpois0.
+    def enterDpois0(self, ctx:PpParser.Dpois0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dpois0.
+    def exitDpois0(self, ctx:PpParser.Dpois0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cpois0.
+    def enterCpois0(self, ctx:PpParser.Cpois0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cpois0.
+    def exitCpois0(self, ctx:PpParser.Cpois0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#rpois0.
+    def enterRpois0(self, ctx:PpParser.Rpois0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#rpois0.
+    def exitRpois0(self, ctx:PpParser.Rpois0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#unif0.
+    def enterUnif0(self, ctx:PpParser.Unif0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#unif0.
+    def exitUnif0(self, ctx:PpParser.Unif0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#dunif0.
+    def enterDunif0(self, ctx:PpParser.Dunif0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#dunif0.
+    def exitDunif0(self, ctx:PpParser.Dunif0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#cunif0.
+    def enterCunif0(self, ctx:PpParser.Cunif0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#cunif0.
+    def exitCunif0(self, ctx:PpParser.Cunif0Context):
+        pass
+
+
+    # Enter a parse tree produced by PpParser#runif0.
+    def enterRunif0(self, ctx:PpParser.Runif0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#runif0.
+    def exitRunif0(self, ctx:PpParser.Runif0Context):
         pass
 
 
