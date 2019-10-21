@@ -350,6 +350,15 @@ class PpListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by PpParser#bool_not0.
+    def enterBool_not0(self, ctx:PpParser.Bool_not0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#bool_not0.
+    def exitBool_not0(self, ctx:PpParser.Bool_not0Context):
+        pass
+
+
     # Enter a parse tree produced by PpParser#bool_op0.
     def enterBool_op0(self, ctx:PpParser.Bool_op0Context):
         pass

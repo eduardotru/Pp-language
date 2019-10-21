@@ -154,7 +154,7 @@ expression0 :
 
 bool_exp0 :
   | bool_term0 bool_exp1
-  | 'not' bool_exp0 bool_exp1
+  | bool_not0 bool_exp0 bool_exp1
   ;
 
 bool_exp1 :
@@ -173,11 +173,13 @@ bool_term1 :
   | // empty
   ;
 
+bool_not0 :
+  'not'
+  ;
+
 bool_op0 :
   'and'
   | 'or'
-  | '=='
-  | '!='
   ;
 
 rel_op0 :
