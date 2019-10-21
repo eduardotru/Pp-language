@@ -6,49 +6,50 @@ class Quadruples:
         self.psaltos = []
         self.quadruples = []
 
-    def newTempRegister(self):
+    def new_temp_register(self):
         pass
     
-    def getQuadCount(self):
+    def get_quad_count(self):
         pass
 
-    def addQuadruple(self, op, left, right, res, ty):
+    def add_quadruple(self, op, left, right, res, ty):
+        print(op, left, right, res, ty)
         pass
 
-    def pushOperator(self, o):
+    def push_operator(self, o):
         pass
 
-    def popOperator(self):
+    def pop_operator(self):
         pass
 
-    def topOperator(self):
+    def top_operator(self):
         pass
 
-    def pushOperand(self, o):
+    def push_operand(self, o):
         pass
 
-    def popOperand(self):
+    def pop_operand(self):
         pass
 
-    def topOperand(self):
+    def top_operand(self):
         pass
 
-    def pushType(self, t):
+    def push_type(self, t):
         pass
 
-    def popType(self):
+    def pop_type(self):
         pass
 
-    def topType(self):
+    def top_type(self):
         pass
 
-    def pushJump(self, j):
+    def push_jump(self, j):
         pass
 
-    def popJump(self):
+    def pop_jump(self):
         pass
 
-    def topJump(self):
+    def top_jump(self):
         pass
 
     def __str__(self):
