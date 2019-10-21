@@ -12,7 +12,7 @@ class Quadruples:
     def getQuadCount(self):
         pass
 
-    def addQuadruple(self):
+    def addQuadruple(self, op, left, right, res, ty):
         pass
 
     def pushOperator(self, o):
