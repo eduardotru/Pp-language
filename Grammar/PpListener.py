@@ -12,9 +12,10 @@ GLOBAL_SCOPE = "program"
 # This class defines a complete listener for a parse tree produced by PpParser.
 class PpListener(ParseTreeListener):
 
-    def __init__(self, symbols_table, semantic_cube):
+    def __init__(self, symbols_table, semantic_cube, quadruples):
         self.symbols_table = symbols_table
         self.semantic_cube = semantic_cube
+        self.quadruples = quadruples
         self.current_scope = GLOBAL_SCOPE
         self.current_type = None
         self.func_parameters = []
