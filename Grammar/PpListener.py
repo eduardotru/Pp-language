@@ -65,12 +65,22 @@ class PpListener(ParseTreeListener):
             self.quadruples.push_jump(self.quadruples.get_quad_count())
             cond = self.quadruples.pop_operand()
             self.quadruples.add_quadruple('gotof', cond, None, None, None)
+        elif self.block_reason[-1] == 'elseif':
+            self.quadruples.push_jump(self.quadruples.get_quad_count())
+            cond = self.quadruples.pop_operand()
+            self.quadruples.add_quadruple('gotof', cond, None, None, None)
+        elif self.block_reason[-1] == 'else':
+            pass
         elif self.block_reason[-1] == 'while':
             pass
 
     # Exit a parse tree produced by PpParser#block0.
     def exitBlock0(self, ctx:PpParser.Block0Context):
         if self.block_reason[-1] == 'if':
+            pass            
+        elif self.block_reason[-1] == 'elseif':
+            pass
+        elif self.block_reason[-1] == 'else':
             pass
         elif self.block_reason[-1] == 'while':
             pass
@@ -263,11 +273,18 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#else0.
     def enterElse0(self, ctx:PpParser.Else0Context):
-        pass
+        if ctx.else0() is not None:
+            self.block_reason.append('elseif')
+        else:
+            self.block_reason.append('else')
+        quad = self.quadruples.pop_jump()
+        self.quadruples.push_jump(self.quadruples.get_quad_count())
+        self.quadruples.add_quadruple('goto', None, None, None, None)
+        self.quadruples.quadruples[quad][3] = self.quadruples.get_quad_count()
 
     # Exit a parse tree produced by PpParser#else0.
     def exitElse0(self, ctx:PpParser.Else0Context):
-        pass
+        self.block_reason.pop()
 
 
     # Enter a parse tree produced by PpParser#while0.
