@@ -58,6 +58,10 @@ class SymbolsTable:
             return True
         return False
 
+    def get_type(self, name, scope):
+        if self.exists_variable(name, scope):
+            return self.functions[scope].variables[name].type
+
     def __str__(self):
         ret = "===============SYMBOLS=TABLE===============\n"
         for i in self.functions:
