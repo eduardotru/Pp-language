@@ -30,6 +30,7 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#r.
     def exitR(self, ctx:PpParser.RContext):
         print(self.symbols_table)
+        print(self.quadruples)
 
 
     # Enter a parse tree produced by PpParser#program0.
@@ -64,15 +65,20 @@ class PpListener(ParseTreeListener):
         if self.block_reason[-1] == 'if':
             self.quadruples.push_jump(self.quadruples.get_quad_count())
             cond = self.quadruples.pop_operand()
-            self.quadruples.add_quadruple('gotof', cond, None, None, None)
+            self.quadruples.pop_type()
+            self.quadruples.add_quadruple('gotof', cond, None, None)
         elif self.block_reason[-1] == 'elseif':
             self.quadruples.push_jump(self.quadruples.get_quad_count())
             cond = self.quadruples.pop_operand()
-            self.quadruples.add_quadruple('gotof', cond, None, None, None)
+            self.quadruples.pop_type()
+            self.quadruples.add_quadruple('gotof', cond, None, None)
         elif self.block_reason[-1] == 'else':
             pass
         elif self.block_reason[-1] == 'while':
-            pass
+            self.quadruples.push_jump(self.quadruples.get_quad_count())
+            cond = self.quadruples.pop_operand()
+            self.quadruples.pop_type()
+            self.quadruples.add_quadruple('gotof', cond, None, None)
 
     # Exit a parse tree produced by PpParser#block0.
     def exitBlock0(self, ctx:PpParser.Block0Context):
@@ -199,11 +205,8 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#assignment0.
     def enterAssignment0(self, ctx:PpParser.Assignment0Context):
-        self.quadruples.push_operand(ctx.value0().getText())
-        self.quadruples.push_type(
-            self.symbols_table.get_type(ctx.value0().getText(), self.current_scope)
-        )
         self.quadruples.push_operator('=')
+
 
     # Exit a parse tree produced by PpParser#assignment0.
     def exitAssignment0(self, ctx:PpParser.Assignment0Context):
@@ -213,16 +216,15 @@ class PpListener(ParseTreeListener):
         t_left = self.quadruples.pop_type()
         operator = self.quadruples.pop_operator()
         try:
-            t_result = self.semantic_cube.cube[t_left][t_right][operator]
+            self.semantic_cube.cube[t_left][t_right][operator]
             self.quadruples.add_quadruple(
                 operator,
                 right,
                 None,
                 left,
-                t_result,
             )
         except Exception:
-            print(f'Semantic error: Incompatble types at {ctx.start.line}:{ctx.start.column}')
+            print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
 
 
     # Enter a parse tree produced by PpParser#function_call0.
@@ -279,20 +281,27 @@ class PpListener(ParseTreeListener):
             self.block_reason.append('else')
         quad = self.quadruples.pop_jump()
         self.quadruples.push_jump(self.quadruples.get_quad_count())
-        self.quadruples.add_quadruple('goto', None, None, None, None)
-        self.quadruples.quadruples[quad][3] = self.quadruples.get_quad_count()
+        self.quadruples.add_quadruple('goto', None, None, None)
+        self.quadruples.quadruples[quad].res = self.quadruples.get_quad_count()
 
     # Exit a parse tree produced by PpParser#else0.
     def exitElse0(self, ctx:PpParser.Else0Context):
+        quad = self.quadruples.pop_jump()
+        self.quadruples.quadruples[quad].res = self.quadruples.get_quad_count()
         self.block_reason.pop()
 
 
     # Enter a parse tree produced by PpParser#while0.
     def enterWhile0(self, ctx:PpParser.While0Context):
         self.block_reason.append('while')
+        self.quadruples.push_jump(self.quadruples.get_quad_count())
 
     # Exit a parse tree produced by PpParser#while0.
     def exitWhile0(self, ctx:PpParser.While0Context):
+        quad = self.quadruples.pop_jump()
+        begin = self.quadruples.pop_jump()
+        self.quadruples.add_quadruple("goto", None, None, begin)
+        self.quadruples.quadruples[quad].res = self.quadruples.get_quad_count()
         self.block_reason.pop()
 
 
@@ -311,7 +320,9 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#input0.
     def exitInput0(self, ctx:PpParser.Input0Context):
-        pass
+        val = self.quadruples.pop_operand()
+        self.quadruples.pop_type()
+        self.quadruples.add_quadruple("read", None, None, val)
 
 
     # Enter a parse tree produced by PpParser#output0.
@@ -320,8 +331,9 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#output0.
     def exitOutput0(self, ctx:PpParser.Output0Context):
-        pass
-
+        val = self.quadruples.pop_operand()
+        self.quadruples.pop_type()
+        self.quadruples.add_quadruple("write", None, None, val)
 
     # Enter a parse tree produced by PpParser#plot0.
     def enterPlot0(self, ctx:PpParser.Plot0Context):
@@ -367,10 +379,8 @@ class PpListener(ParseTreeListener):
     def exitBool_exp0(self, ctx:PpParser.Bool_exp0Context):
         pass
 
-
-    # Enter a parse tree produced by PpParser#bool_exp1.
-    def enterBool_exp1(self, ctx:PpParser.Bool_exp1Context):
-        if self.quadruples.top_operator() in ['and', 'or']:
+    def boolOp(self):
+        if self.quadruples.has_operator() and self.quadruples.top_operator() in ['and', 'or']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
             left = self.quadruples.pop_operand()
@@ -378,21 +388,27 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples.pop_operator()
             try:
                 t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                temp_register = self.quadruples.new_temp_register()
                 self.quadruples.add_quadruple(
                     operator,
                     left,
                     right,
-                    self.quadruples.new_temp_register(),
-                    t_result,
+                    temp_register,
                 )
+                self.quadruples.push_operand(temp_register)
+                self.quadruples.push_type(t_result)
             except Exception:
-                print(f'Semantic error: Incompatble types at {ctx.start.line}:{ctx.start.column}')
+                print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+
+    # Enter a parse tree produced by PpParser#bool_exp1.
+    def enterBool_exp1(self, ctx:PpParser.Bool_exp1Context):
+        self.boolOp()
         if ctx.bool_op0() is not None:
             self.quadruples.push_operator(ctx.bool_op0().getText())
 
     # Exit a parse tree produced by PpParser#bool_exp1.
     def exitBool_exp1(self, ctx:PpParser.Bool_exp1Context):
-        pass
+        self.boolOp()
 
 
     # Enter a parse tree produced by PpParser#bool_term0.
@@ -404,9 +420,8 @@ class PpListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by PpParser#bool_term1.
-    def enterBool_term1(self, ctx:PpParser.Bool_term1Context):
-        if self.quadruples.top_operator() in ['==', '!=', '>', '<', '>=', '<=']:
+    def relationalOp(self):
+        if self.quadruples.has_operator() and self.quadruples.top_operator() in ['==', '!=', '>', '<', '>=', '<=']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
             left = self.quadruples.pop_operand()
@@ -414,21 +429,27 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples.pop_operator()
             try:
                 t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                temp_register = self.quadruples.new_temp_register()
                 self.quadruples.add_quadruple(
                     operator,
                     left,
                     right,
-                    self.quadruples.new_temp_register(),
-                    t_result,
+                    temp_register,
                 )
+                self.quadruples.push_operand(temp_register)
+                self.quadruples.push_type(t_result)
             except Exception:
-                print(f'Semantic error: Incompatble types at {ctx.start.line}:{ctx.start.column}')
+                print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+
+    # Enter a parse tree produced by PpParser#bool_term1.
+    def enterBool_term1(self, ctx:PpParser.Bool_term1Context):
+        self.relationalOp()
         if ctx.rel_op0() is not None:
             self.quadruples.push_operator(ctx.rel_op0().getText())
 
     # Exit a parse tree produced by PpParser#bool_term1.
     def exitBool_term1(self, ctx:PpParser.Bool_term1Context):
-        pass
+        self.relationalOp()
 
 
     # Enter a parse tree produced by PpParser#bool_not0.
@@ -466,10 +487,8 @@ class PpListener(ParseTreeListener):
     def exitArithmetic_exp0(self, ctx:PpParser.Arithmetic_exp0Context):
         pass
 
-
-    # Enter a parse tree produced by PpParser#arithmetic_exp1.
-    def enterArithmetic_exp1(self, ctx:PpParser.Arithmetic_exp1Context):
-        if self.quadruples.top_operator() in ['+', '-']:
+    def additionSubtractionOp(self):
+        if self.quadruples.has_operator() and self.quadruples.top_operator() in ['+', '-']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
             left = self.quadruples.pop_operand()
@@ -477,21 +496,27 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples.pop_operator()
             try:
                 t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                temp_register = self.quadruples.new_temp_register()
                 self.quadruples.add_quadruple(
                     operator,
                     left,
                     right,
-                    self.quadruples.new_temp_register(),
-                    t_result,
+                    temp_register
                 )
+                self.quadruples.push_operand(temp_register)
+                self.quadruples.push_type(t_result)
             except Exception:
-                print(f'Semantic error: Incompatble types at {ctx.start.line}:{ctx.start.column}')
+                print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+
+    # Enter a parse tree produced by PpParser#arithmetic_exp1.
+    def enterArithmetic_exp1(self, ctx:PpParser.Arithmetic_exp1Context):
+        self.additionSubtractionOp()
         if ctx.addition_subtraction0() is not None:
             self.quadruples.push_operator(ctx.addition_subtraction0().getText())
 
     # Exit a parse tree produced by PpParser#arithmetic_exp1.
     def exitArithmetic_exp1(self, ctx:PpParser.Arithmetic_exp1Context):
-        pass
+        self.additionSubtractionOp()
 
 
     # Enter a parse tree produced by PpParser#addition_subtraction0.
@@ -511,10 +536,8 @@ class PpListener(ParseTreeListener):
     def exitArithmetic_factor0(self, ctx:PpParser.Arithmetic_factor0Context):
         pass
 
-
-    # Enter a parse tree produced by PpParser#arithmetic_factor1.
-    def enterArithmetic_factor1(self, ctx:PpParser.Arithmetic_factor1Context):
-        if self.quadruples.top_operator() in ['*', '/', '%']:
+    def multiplicationDivisionOp(self):
+        if self.quadruples.has_operator() and  self.quadruples.top_operator() in ['*', '/', '%']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
             left = self.quadruples.pop_operand()
@@ -522,21 +545,27 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples.pop_operator()
             try:
                 t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                temp_register = self.quadruples.new_temp_register()
                 self.quadruples.add_quadruple(
                     operator,
                     left,
                     right,
-                    self.quadruples.new_temp_register(),
-                    t_result,
+                    temp_register,
                 )
+                self.quadruples.push_operand(temp_register)
+                self.quadruples.push_type(t_result)
             except Exception:
-                print(f'Semantic error: Incompatble types at {ctx.start.line}:{ctx.start.column}')
+                print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+
+    # Enter a parse tree produced by PpParser#arithmetic_factor1.
+    def enterArithmetic_factor1(self, ctx:PpParser.Arithmetic_factor1Context):
+        self.multiplicationDivisionOp()
         if ctx.multiplication_division0() is not None:
             self.quadruples.push_operator(ctx.multiplication_division0().getText())   
 
     # Exit a parse tree produced by PpParser#arithmetic_factor1.
     def exitArithmetic_factor1(self, ctx:PpParser.Arithmetic_factor1Context):
-        pass
+        self.multiplicationDivisionOp()
 
 
     # Enter a parse tree produced by PpParser#multiplication_division0.
@@ -556,10 +585,8 @@ class PpListener(ParseTreeListener):
     def exitArithmetic_term0(self, ctx:PpParser.Arithmetic_term0Context):
         pass
 
-
-    # Enter a parse tree produced by PpParser#arithmetic_term1.
-    def enterArithmetic_term1(self, ctx:PpParser.Arithmetic_term1Context):
-        if self.quadruples.top_operator() == '^':
+    def exponentiationOp(self):
+        if self.quadruples.has_operator() and self.quadruples.top_operator() == '^':
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
             left = self.quadruples.pop_operand()
@@ -567,15 +594,21 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples.pop_operator()
             try:
                 t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                temp_register = self.quadruples.new_temp_register()
                 self.quadruples.add_quadruple(
                     operator,
                     left,
                     right,
-                    self.quadruples.new_temp_register(),
-                    t_result,
+                    temp_register,
                 )
+                self.quadruples.push_operand(temp_register)
+                self.quadruples.push_type(t_result)
             except Exception:
-                print(f'Semantic error: Incompatble types at {ctx.start.line}:{ctx.start.column}')
+                print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+
+    # Enter a parse tree produced by PpParser#arithmetic_term1.
+    def enterArithmetic_term1(self, ctx:PpParser.Arithmetic_term1Context):
+        self.exponentiationOp()
         if ctx.exponent0() is not None:
             self.quadruples.push_operator('^')   
 
@@ -583,7 +616,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#arithmetic_term1.
     def exitArithmetic_term1(self, ctx:PpParser.Arithmetic_term1Context):
-        pass
+        self.exponentiationOp()
 
 
     # Enter a parse tree produced by PpParser#exponent0.
@@ -599,6 +632,15 @@ class PpListener(ParseTreeListener):
     def enterNumeric_term0(self, ctx:PpParser.Numeric_term0Context):
         if ctx.bool_exp0() is not None:
             self.quadruples.push_operator('(')
+        if ctx.INT_NUMBER() is not None:
+            self.quadruples.push_operand(ctx.INT_NUMBER().getText())
+            self.quadruples.push_type(BasicTypes.INT)
+        if ctx.FLOAT_NUMBER() is not None:
+            self.quadruples.push_operand(ctx.FLOAT_NUMBER().getText())
+            self.quadruples.push_type(BasicTypes.FLOAT)
+        if ctx.BOOL_LITERAL() is not None:
+            self.quadruples.push_operand(ctx.BOOL_LITERAL().getText())
+            self.quadruples.push_type(BasicTypes.BOOL)
 
     # Exit a parse tree produced by PpParser#numeric_term0.
     def exitNumeric_term0(self, ctx:PpParser.Numeric_term0Context):
