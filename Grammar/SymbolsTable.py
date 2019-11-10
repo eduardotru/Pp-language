@@ -60,7 +60,10 @@ class SymbolsTable:
 
     def get_type(self, name, scope):
         if self.exists_variable(name, scope):
-            return self.functions[scope].variables[name].type
+            if name in self.functions[scope].variables:
+                return self.functions[scope].variables[name].type 
+            else:
+                return self.functions["program"].variables[name].type
 
     def __str__(self):
         ret = "===============SYMBOLS=TABLE===============\n"

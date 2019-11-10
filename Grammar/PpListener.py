@@ -120,6 +120,7 @@ class PpListener(ParseTreeListener):
         except Exception:
             print(f"Semantic error: Redefinition of function {self.func_name}"
                 f"at {ctx.start.line}:{ctx.start.column}")
+            exit()
 
     # Exit a parse tree produced by PpParser#decl_block0.
     def exitDecl_block0(self, ctx:PpParser.Decl_block0Context):
@@ -178,6 +179,7 @@ class PpListener(ParseTreeListener):
         except Exception:
             print(f"Semantic error: Redefinition of variable '{ctx.ID().getText()}' at "
                 f"{ctx.start.line}:{ctx.start.column}")
+            exit()
 
     # Exit a parse tree produced by PpParser#variable_decl0.
     def exitVariable_decl0(self, ctx:PpParser.Variable_decl0Context):
@@ -197,6 +199,7 @@ class PpListener(ParseTreeListener):
         except Exception:
             print(f"Semantic error: Redefinition of variable '{ctx.ID().getText()}' at "
                     f"line {ctx.start.line}:{ctx.start.column}")
+            exit()
 
     # Exit a parse tree produced by PpParser#variables_decl1.
     def exitVariables_decl1(self, ctx:PpParser.Variables_decl1Context):
@@ -225,6 +228,7 @@ class PpListener(ParseTreeListener):
             )
         except Exception:
             print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+            exit()
 
 
     # Enter a parse tree produced by PpParser#function_call0.
@@ -240,6 +244,7 @@ class PpListener(ParseTreeListener):
     def enterFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
         if not self.symbols_table.exists_function(ctx.ID().getText(), []):
             print(f"Semantic error: Use of undeclared function {ctx.ID().getText()} at {ctx.start.line}:{ctx.start.column}")
+            exit()
 
     # Exit a parse tree produced by PpParser#function_call_aux0.
     def exitFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
@@ -379,7 +384,7 @@ class PpListener(ParseTreeListener):
     def exitBool_exp0(self, ctx:PpParser.Bool_exp0Context):
         pass
 
-    def boolOp(self):
+    def boolOp(self, ctx):
         if self.quadruples.has_operator() and self.quadruples.top_operator() in ['and', 'or']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
@@ -399,16 +404,17 @@ class PpListener(ParseTreeListener):
                 self.quadruples.push_type(t_result)
             except Exception:
                 print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
     # Enter a parse tree produced by PpParser#bool_exp1.
     def enterBool_exp1(self, ctx:PpParser.Bool_exp1Context):
-        self.boolOp()
+        self.boolOp(ctx)
         if ctx.bool_op0() is not None:
             self.quadruples.push_operator(ctx.bool_op0().getText())
 
     # Exit a parse tree produced by PpParser#bool_exp1.
     def exitBool_exp1(self, ctx:PpParser.Bool_exp1Context):
-        self.boolOp()
+        self.boolOp(ctx)
 
 
     # Enter a parse tree produced by PpParser#bool_term0.
@@ -420,7 +426,7 @@ class PpListener(ParseTreeListener):
         pass
 
 
-    def relationalOp(self):
+    def relationalOp(self, ctx):
         if self.quadruples.has_operator() and self.quadruples.top_operator() in ['==', '!=', '>', '<', '>=', '<=']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
@@ -440,16 +446,17 @@ class PpListener(ParseTreeListener):
                 self.quadruples.push_type(t_result)
             except Exception:
                 print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
     # Enter a parse tree produced by PpParser#bool_term1.
     def enterBool_term1(self, ctx:PpParser.Bool_term1Context):
-        self.relationalOp()
+        self.relationalOp(ctx)
         if ctx.rel_op0() is not None:
             self.quadruples.push_operator(ctx.rel_op0().getText())
 
     # Exit a parse tree produced by PpParser#bool_term1.
     def exitBool_term1(self, ctx:PpParser.Bool_term1Context):
-        self.relationalOp()
+        self.relationalOp(ctx)
 
 
     # Enter a parse tree produced by PpParser#bool_not0.
@@ -487,7 +494,7 @@ class PpListener(ParseTreeListener):
     def exitArithmetic_exp0(self, ctx:PpParser.Arithmetic_exp0Context):
         pass
 
-    def additionSubtractionOp(self):
+    def additionSubtractionOp(self, ctx):
         if self.quadruples.has_operator() and self.quadruples.top_operator() in ['+', '-']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
@@ -507,16 +514,17 @@ class PpListener(ParseTreeListener):
                 self.quadruples.push_type(t_result)
             except Exception:
                 print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
     # Enter a parse tree produced by PpParser#arithmetic_exp1.
     def enterArithmetic_exp1(self, ctx:PpParser.Arithmetic_exp1Context):
-        self.additionSubtractionOp()
+        self.additionSubtractionOp(ctx)
         if ctx.addition_subtraction0() is not None:
             self.quadruples.push_operator(ctx.addition_subtraction0().getText())
 
     # Exit a parse tree produced by PpParser#arithmetic_exp1.
     def exitArithmetic_exp1(self, ctx:PpParser.Arithmetic_exp1Context):
-        self.additionSubtractionOp()
+        self.additionSubtractionOp(ctx)
 
 
     # Enter a parse tree produced by PpParser#addition_subtraction0.
@@ -536,7 +544,7 @@ class PpListener(ParseTreeListener):
     def exitArithmetic_factor0(self, ctx:PpParser.Arithmetic_factor0Context):
         pass
 
-    def multiplicationDivisionOp(self):
+    def multiplicationDivisionOp(self, ctx):
         if self.quadruples.has_operator() and  self.quadruples.top_operator() in ['*', '/', '%']:
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
@@ -556,16 +564,17 @@ class PpListener(ParseTreeListener):
                 self.quadruples.push_type(t_result)
             except Exception:
                 print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
     # Enter a parse tree produced by PpParser#arithmetic_factor1.
     def enterArithmetic_factor1(self, ctx:PpParser.Arithmetic_factor1Context):
-        self.multiplicationDivisionOp()
+        self.multiplicationDivisionOp(ctx)
         if ctx.multiplication_division0() is not None:
             self.quadruples.push_operator(ctx.multiplication_division0().getText())   
 
     # Exit a parse tree produced by PpParser#arithmetic_factor1.
     def exitArithmetic_factor1(self, ctx:PpParser.Arithmetic_factor1Context):
-        self.multiplicationDivisionOp()
+        self.multiplicationDivisionOp(ctx)
 
 
     # Enter a parse tree produced by PpParser#multiplication_division0.
@@ -585,7 +594,7 @@ class PpListener(ParseTreeListener):
     def exitArithmetic_term0(self, ctx:PpParser.Arithmetic_term0Context):
         pass
 
-    def exponentiationOp(self):
+    def exponentiationOp(self, ctx):
         if self.quadruples.has_operator() and self.quadruples.top_operator() == '^':
             right = self.quadruples.pop_operand()
             t_right = self.quadruples.pop_type()
@@ -605,10 +614,11 @@ class PpListener(ParseTreeListener):
                 self.quadruples.push_type(t_result)
             except Exception:
                 print(f'Semantic error: Incompatible types on operation {t_left}{operator}{t_right} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
     # Enter a parse tree produced by PpParser#arithmetic_term1.
     def enterArithmetic_term1(self, ctx:PpParser.Arithmetic_term1Context):
-        self.exponentiationOp()
+        self.exponentiationOp(ctx)
         if ctx.exponent0() is not None:
             self.quadruples.push_operator('^')   
 
@@ -616,7 +626,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#arithmetic_term1.
     def exitArithmetic_term1(self, ctx:PpParser.Arithmetic_term1Context):
-        self.exponentiationOp()
+        self.exponentiationOp(ctx)
 
 
     # Enter a parse tree produced by PpParser#exponent0.
@@ -698,6 +708,7 @@ class PpListener(ParseTreeListener):
         if not self.symbols_table.exists_variable(ctx.ID().getText(), self.current_scope):
             print(f"Semantic error: Use of undefined variable {ctx.ID().getText()}"
                 f" at {ctx.start.line}:{ctx.start.column}")
+            exit()
         self.quadruples.push_operand(ctx.ID().getText())
         self.quadruples.push_type(self.symbols_table.get_type(ctx.ID().getText(), self.current_scope))
 
