@@ -9,6 +9,5 @@ func int f1(int a, int b, int c, int d) {
 
 func int f2(string a, int b, float c, bool d) {
   let string x, y, z;
-  return a;
+  return b;
 }
-
