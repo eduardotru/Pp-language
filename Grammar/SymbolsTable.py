@@ -64,6 +64,11 @@ class SymbolsTable:
                 return self.functions[scope].variables[name].type 
             else:
                 return self.functions["program"].variables[name].type
+        else:
+            raise Exception("Variable does not exist in this scope.")
+
+    def get_return_type(self, name):
+        return self.functions[name].return_type
 
     def __str__(self):
         ret = "===============SYMBOLS=TABLE===============\n"
