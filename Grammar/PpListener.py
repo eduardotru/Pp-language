@@ -125,12 +125,7 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#decl_block0.
     def enterDecl_block0(self, ctx:PpParser.Decl_block0Context):
-        try:
-            self.symbols_table.add_function(self.func_name, BasicTypes(self.func_type), self.func_parameters)
-        except Exception:
-            print(f"Semantic error: Redefinition of function {self.func_name}"
-                f"at {ctx.start.line}:{ctx.start.column}")
-            exit()
+        pass
 
     # Exit a parse tree produced by PpParser#decl_block0.
     def exitDecl_block0(self, ctx:PpParser.Decl_block0Context):
@@ -152,8 +147,15 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#parameters_or_empty0.
     def exitParameters_or_empty0(self, ctx:PpParser.Parameters_or_empty0Context):
+        try:
+            self.symbols_table.add_function(self.func_name, BasicTypes(self.func_type), self.func_parameters)
+        except Exception:
+            print(f"Semantic error: Redefinition of function {self.func_name}"
+                f"at {ctx.start.line}:{ctx.start.column}")
+            exit()
         for param in self.func_parameters[::-1]:
-            self.quadruples[-1].add_quadruple("=", "popparam", None, param.name)
+            memory_dir = self.symbols_table.name_to_dir(param.name, self.current_scope)
+            self.quadruples[-1].add_quadruple("=", "popparam", None, memory_dir)
 
 
     # Enter a parse tree produced by PpParser#parameters0.
@@ -773,8 +775,9 @@ class PpListener(ParseTreeListener):
             print(f"Semantic error: Use of undefined variable {ctx.ID().getText()}"
                 f" at {ctx.start.line}:{ctx.start.column}")
             exit()
-        self.quadruples[-1].push_operand(ctx.ID().getText())
-        self.quadruples[-1].push_type(self.symbols_table.get_type(ctx.ID().getText(), self.current_scope))
+        memory_dir = self.symbols_table.name_to_dir(ctx.ID().getText(), self.current_scope)
+        self.quadruples[-1].push_operand(memory_dir)
+        self.quadruples[-1].push_type(self.symbols_table.get_type(memory_dir, self.current_scope))
 
     # Exit a parse tree produced by PpParser#value0.
     def exitValue0(self, ctx:PpParser.Value0Context):
