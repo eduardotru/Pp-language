@@ -14,7 +14,9 @@ class Function:
     def __init__(self, name, return_type, parameters):
         self.name = name
         self.return_type = return_type
+        self.parameters = []
         self.variables = parameters
+        self.memory = 0
 
 
 class Variable:
@@ -35,6 +37,7 @@ class SymbolsTable:
         else:
             self.functions[name] = Function(
                 name, return_type, {})
+            self.functions[name].parameters = parameters
             for parameter in parameters:
                 self.add_variable(
                     parameter.name, parameter.type, name)
@@ -69,6 +72,17 @@ class SymbolsTable:
 
     def get_return_type(self, name):
         return self.functions[name].return_type
+
+    def get_function_param_type(self, name, index):
+        print(self.functions[name].parameters)
+        print(index)
+        return self.functions[name].parameters[index].type
+
+    def set_function_memory(self, name, temp_memory):
+        self.functions[name].memory = temp_memory + len(self.functions[name].variables)
+
+    def get_function_memory(self, name):
+        return self.functions[name].memory 
 
     def __str__(self):
         ret = "===============SYMBOLS=TABLE===============\n"

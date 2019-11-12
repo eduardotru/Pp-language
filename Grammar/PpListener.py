@@ -24,6 +24,8 @@ class PpListener(ParseTreeListener):
         self.func_name = None
         self.func_type = None
         self.block_reason = []
+        self.param_index = []
+        self.function_call_stack = []
     
     # Enter a parse tree produced by PpParser#r.
     def enterR(self, ctx:PpParser.RContext):
@@ -115,6 +117,7 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#function_decl0.
     def exitFunction_decl0(self, ctx:PpParser.Function_decl0Context):
         self.obj.add_function_quadruples(self.current_scope, self.quadruples[-1])
+        self.symbols_table.set_function_memory(self.current_scope, self.quadruples[-1].temp_register_ptr)
         self.quadruples.pop()
         self.current_scope = GLOBAL_SCOPE
         
@@ -149,7 +152,8 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#parameters_or_empty0.
     def exitParameters_or_empty0(self, ctx:PpParser.Parameters_or_empty0Context):
-        pass
+        for param in self.func_parameters[::-1]:
+            self.quadruples[-1].add_quadruple("=", "popparam", None, param.name)
 
 
     # Enter a parse tree produced by PpParser#parameters0.
@@ -252,10 +256,24 @@ class PpListener(ParseTreeListener):
         if not self.symbols_table.exists_function(ctx.ID().getText(), []):
             print(f"Semantic error: Use of undeclared function {ctx.ID().getText()} at {ctx.start.line}:{ctx.start.column}")
             exit()
+        self.function_call_stack.append(ctx.ID().getText())
+        self.param_index.append(0);
+        
 
     # Exit a parse tree produced by PpParser#function_call_aux0.
     def exitFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
-        pass
+        self.quadruples[-1].add_quadruple(
+            "era",
+            self.symbols_table.get_function_memory(self.function_call_stack[-1]),
+            None,
+            None,
+        )
+        self.quadruples[-1].add_quadruple("gosub", None, None, ctx.ID().getText())
+        if self.symbols_table.get_return_type(self.function_call_stack[-1]) != BasicTypes.VOID:
+            self.quadruples[-1].push_operand("retVal")
+            self.quadruples[-1].push_type(self.symbols_table.get_return_type(self.function_call_stack[-1]))
+        self.param_index.pop()
+        self.function_call_stack.pop()
 
 
     # Enter a parse tree produced by PpParser#function_call_aux1.
@@ -264,7 +282,21 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#function_call_aux1.
     def exitFunction_call_aux1(self, ctx:PpParser.Function_call_aux1Context):
-        pass
+        if ctx.expression0() is not None:
+            val = self.quadruples[-1].pop_operand()
+            val_type = self.quadruples[-1].pop_type()
+            param_type = self.symbols_table.get_function_param_type(
+                self.function_call_stack[-1],
+                self.param_index[-1]
+                )
+            self.param_index[-1] = self.param_index[-1] + 1
+            try:
+                self.semantic_cube.cube[param_type][val_type]["="]
+                self.quadruples[-1].add_quadruple("pushparam", val, None, None)
+            except Exception:
+                print(f'Semantic error: Incompatible parameter type. Expected '
+                      f'{param_type}, found {val_type} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
 
     # Enter a parse tree produced by PpParser#function_call_aux2.
@@ -273,7 +305,21 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#function_call_aux2.
     def exitFunction_call_aux2(self, ctx:PpParser.Function_call_aux2Context):
-        pass
+        if ctx.expression0() is not None:
+            val = self.quadruples[-1].pop_operand()
+            val_type = self.quadruples[-1].pop_type()
+            param_type = self.symbols_table.get_function_param_type(
+                self.function_call_stack[-1],
+                self.param_index[-1]
+                )
+            self.param_index[-1] = self.param_index[-1] + 1
+            try:
+                self.semantic_cube.cube[param_type][val_type]["="]
+                self.quadruples[-1].add_quadruple("push_param", val, None, None)
+            except Exception:
+                print(f'Semantic error: Incompatible parameter type. Expected '
+                      f'{param_type}, found {val_type} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
 
     # Enter a parse tree produced by PpParser#if0.

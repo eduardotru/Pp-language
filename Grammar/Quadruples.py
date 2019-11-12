@@ -13,7 +13,7 @@ class Quadruples:
         self.psaltos = []
         self.ptipos = []
         self.quadruples = []
-        self.temp_register_ptr = 1
+        self.temp_register_ptr = 0
 
     def new_temp_register(self):
         ret = "t" + str(self.temp_register_ptr)
