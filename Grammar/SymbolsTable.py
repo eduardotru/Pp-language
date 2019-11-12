@@ -11,21 +11,25 @@ class BasicTypes(Enum):
 
 
 class Function:
-    def __init__(self, name, return_type, parameters):
+    def __init__(self, name, return_type, parameters, memory_dir):
         self.name = name
         self.return_type = return_type
         self.variables = parameters
+        self.memory_dir = memory_dir
 
 
 class Variable:
-    def __init__(self, name, data_type, scope):
+    def __init__(self, name, data_type, scope, memory_dir):
         self.name = name
         self.type = data_type
         self.scope = scope
+        self.memory_dir = memory_dir
 
 
 class SymbolsTable:
     def __init__(self):
+        self.memory_pointer = 0
+        self.dir_to_memory_dict = {}
         self.functions = {}
         self.add_function("program", BasicTypes.VOID, {})
 
@@ -34,7 +38,9 @@ class SymbolsTable:
             raise Exception("The function already exists.")
         else:
             self.functions[name] = Function(
-                name, return_type, {})
+                name, return_type, {}, self.memory_pointer)
+            self.dir_to_memory_dict[self.memory_pointer] = name
+            self.memory_pointer = self.memory_pointer + 1
             for parameter in parameters:
                 self.add_variable(
                     parameter.name, parameter.type, name)
@@ -51,17 +57,27 @@ class SymbolsTable:
             raise Exception("The variable already exists in this scope.")
         else:
             self.functions[scope].variables[name] = Variable(
-                name, data_type, scope)
+                name, data_type, scope, self.memory_pointer)
+            self.dir_to_memory_dict[self.memory_pointer] = name
+            self.memory_pointer = self.memory_pointer + 1
 
     def exists_variable(self, name, scope):
         if name in self.functions[scope].variables or name in self.functions["program"].variables:
             return True
         return False
 
-    def get_type(self, name, scope):
+    def dir_to_name(self, memory_dir):
+        if memory_dir >= self.memory_pointer:
+            raise Exception("Memory direction empty.")
+        elif memory_dir < 0:
+            raise Exception("Memory direction invalid.")
+        return self.dir_to_memory_dict[memory_dir]
+
+    def get_type(self, memory_dir, scope):
+        name = self.dir_to_name(memory_dir)
         if self.exists_variable(name, scope):
             if name in self.functions[scope].variables:
-                return self.functions[scope].variables[name].type 
+                return self.functions[scope].variables[name].type
             else:
                 return self.functions["program"].variables[name].type
         else:
@@ -74,7 +90,8 @@ class SymbolsTable:
         ret = "===============SYMBOLS=TABLE===============\n"
         for i in self.functions:
             func = self.functions[i]
-            ret += "-----> " + func.name + " : " + func.return_type.value + "\n"
+            ret += "-----> " + func.name + " : " + \
+                func.return_type.value + " @ " + str(func.memory_dir) + "\n"
             for j in self.functions[func.name].variables:
                 variable = self.functions[func.name].variables[j]
                 ret += "NAME: " + variable.name + "\n"
