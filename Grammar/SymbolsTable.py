@@ -14,12 +14,14 @@ class Function:
     def __init__(self, name, return_type, parameters, memory_dir):
         self.name = name
         self.return_type = return_type
+        self.parameters = []
         self.variables = parameters
+        self.memory_size = 0
         self.memory_dir = memory_dir
 
 
 class Variable:
-    def __init__(self, name, data_type, scope, memory_dir):
+    def __init__(self, name, data_type, scope, memory_dir = 0):
         self.name = name
         self.type = data_type
         self.scope = scope
@@ -39,6 +41,7 @@ class SymbolsTable:
         else:
             self.functions[name] = Function(
                 name, return_type, {}, self.memory_pointer)
+            self.functions[name].parameters = parameters
             self.dir_to_memory_dict[self.memory_pointer] = name
             self.memory_pointer = self.memory_pointer + 1
             for parameter in parameters:
@@ -73,6 +76,15 @@ class SymbolsTable:
             raise Exception("Memory direction invalid.")
         return self.dir_to_memory_dict[memory_dir]
 
+    def name_to_dir(self, name, scope):
+        if self.exists_variable(name, scope):
+            if name in self.functions[scope].variables:
+                return self.functions[scope].variables[name].memory_dir
+            else:
+                return self.functions["program"].variables[name].memory_dir
+        else:
+            raise Exception("Variable does not exist in this scope.")
+
     def get_type(self, memory_dir, scope):
         name = self.dir_to_name(memory_dir)
         if self.exists_variable(name, scope):
@@ -85,6 +97,17 @@ class SymbolsTable:
 
     def get_return_type(self, name):
         return self.functions[name].return_type
+
+    def get_function_param_type(self, name, index):
+        print(self.functions[name].parameters)
+        print(index)
+        return self.functions[name].parameters[index].type
+
+    def set_function_memory(self, name, temp_memory):
+        self.functions[name].memory_size = temp_memory + len(self.functions[name].variables)
+
+    def get_function_memory(self, name):
+        return self.functions[name].memory_size 
 
     def __str__(self):
         ret = "===============SYMBOLS=TABLE===============\n"
