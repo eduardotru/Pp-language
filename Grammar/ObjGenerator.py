@@ -20,7 +20,7 @@ class ObjGenerator:
             else:
                 ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
                     "\t\t" + str(quad.left) + "\t\t" + \
-                    str(quad.right) + "\t\t" + str(quad.res)
+                    str(quad.right) + "\t\t" + str(quad.res) + "\n"
                 self.instruction_ptr = self.instruction_ptr + 1
 
         return ret
