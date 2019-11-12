@@ -12,13 +12,15 @@ class ObjGenerator:
 
     def joinQuads(self, quads, symbols_table):
         ret = ""
-        for i in len(quads):
+        for i in range(len(quads)):
             quad = quads[i]
             if quad.op == "gosub":
-                ret += self.joinQuads(self.functions[quad.res], symbols_table)
+                ret += self.joinQuads(
+                    self.functions[quad.res].quadruples, symbols_table)
             else:
-                ret += str(self.instruction_ptr) + "\t\t" + quad.op + \
-                    "\t\t" + quad.left + "\t\t" + quad.right + "\t\t" + quad.res
+                ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
+                    "\t\t" + str(quad.left) + "\t\t" + \
+                    str(quad.right) + "\t\t" + str(quad.res)
                 self.instruction_ptr = self.instruction_ptr + 1
 
         return ret
@@ -26,5 +28,5 @@ class ObjGenerator:
     def gen_obj_file(self, symbols_table):
         print("==================QUADRUPLES by Pp==================")
         print("#\t\tOp\t\tLeft\t\tRight\t\tRes\n")
-        print(self.joinQuads(self.program, symbols_table))
+        print(self.joinQuads(self.program.quadruples, symbols_table))
         print("======================================")
