@@ -6,7 +6,7 @@ else:
     from PpParser import PpParser
 
 from Quadruples import Quadruples
-from SymbolsTable import BasicTypes, Variable
+from SymbolsTable import BasicTypes, StructuredTypes, Type, Variable
 
 GLOBAL_SCOPE = "program"
 
@@ -26,6 +26,17 @@ class PpListener(ParseTreeListener):
         self.block_reason = []
         self.param_index = []
         self.function_call_stack = []
+
+    def get_type(self, ctx):
+        basic_type = BasicTypes(ctx.basic_type0().getText())
+        struct_type = StructuredTypes.NONE
+        rows = None
+        cols = None
+        if ctx.getText().startswith("matrix"):
+            struct_type = StructuredTypes.MATRIX
+            rows = ctx.INT_NUMBER(0)
+            cols = ctx.INT_NUMBER(1)
+        return Type(basic_type, struct_type, rows, cols)
     
     # Enter a parse tree produced by PpParser#r.
     def enterR(self, ctx:PpParser.RContext):
@@ -110,7 +121,7 @@ class PpListener(ParseTreeListener):
     def enterFunction_decl0(self, ctx:PpParser.Function_decl0Context):
         self.current_scope = ctx.ID().getText()
         self.func_name = ctx.ID().getText()
-        self.func_type = ctx.type0().getText()
+        self.func_type = self.get_type(ctx.type0())
         self.func_parameters = []
         self.quadruples.append(Quadruples())
     
@@ -148,20 +159,20 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#parameters_or_empty0.
     def exitParameters_or_empty0(self, ctx:PpParser.Parameters_or_empty0Context):
         try:
-            self.symbols_table.add_function(self.func_name, BasicTypes(self.func_type), self.func_parameters)
+            self.symbols_table.add_function(self.func_name, self.func_type, self.func_parameters)
         except Exception:
             print(f"Semantic error: Redefinition of function {self.func_name}"
                 f"at {ctx.start.line}:{ctx.start.column}")
             exit()
         for param in self.func_parameters[::-1]:
             memory_dir = self.symbols_table.name_to_dir(param.name, self.current_scope)
-            self.quadruples[-1].add_quadruple("=", "popparam", None, memory_dir)
+            self.quadruples[-1].add_quadruple("=", "pop_param", None, memory_dir)
 
 
     # Enter a parse tree produced by PpParser#parameters0.
     def enterParameters0(self, ctx:PpParser.Parameters0Context):
         self.func_parameters.append(
-            Variable(ctx.ID().getText(), BasicTypes(ctx.type0().getText()), self.current_scope)
+            Variable(ctx.ID().getText(), self.get_type(ctx.type0()), self.current_scope)
         )
 
     # Exit a parse tree produced by PpParser#parameters0.
@@ -182,11 +193,11 @@ class PpListener(ParseTreeListener):
     def enterVariable_decl0(self, ctx:PpParser.Variable_decl0Context):
         if ctx.ID() is None:
             return
-        self.current_type = ctx.type0().getText()
+        self.current_type = self.get_type(ctx.type0())
         try:
             self.symbols_table.add_variable(
                 ctx.ID().getText(),
-                BasicTypes(self.current_type),
+                self.current_type,
                 self.current_scope,
             )
         except Exception:
@@ -206,7 +217,7 @@ class PpListener(ParseTreeListener):
         try:
             self.symbols_table.add_variable(
                 ctx.ID().getText(),
-                BasicTypes(self.current_type),
+                self.current_type,
                 self.current_scope
             )
         except Exception:
@@ -232,7 +243,7 @@ class PpListener(ParseTreeListener):
         t_left = self.quadruples[-1].pop_type()
         operator = self.quadruples[-1].pop_operator()
         try:
-            self.semantic_cube.cube[t_left][t_right][operator]
+            self.semantic_cube.get(t_left, t_right, operator)
             self.quadruples[-1].add_quadruple(
                 operator,
                 right,
@@ -271,7 +282,7 @@ class PpListener(ParseTreeListener):
             None,
         )
         self.quadruples[-1].add_quadruple("gosub", None, None, ctx.ID().getText())
-        if self.symbols_table.get_return_type(self.function_call_stack[-1]) != BasicTypes.VOID:
+        if self.symbols_table.get_return_type(self.function_call_stack[-1]).basic_type != BasicTypes.VOID:
             self.quadruples[-1].push_operand("retVal")
             self.quadruples[-1].push_type(self.symbols_table.get_return_type(self.function_call_stack[-1]))
         self.param_index.pop()
@@ -293,8 +304,8 @@ class PpListener(ParseTreeListener):
                 )
             self.param_index[-1] = self.param_index[-1] + 1
             try:
-                self.semantic_cube.cube[param_type][val_type]["="]
-                self.quadruples[-1].add_quadruple("pushparam", val, None, None)
+                self.semantic_cube.get(param_type, val_type, "=")
+                self.quadruples[-1].add_quadruple("push_param", val, None, None)
             except Exception:
                 print(f'Semantic error: Incompatible parameter type. Expected '
                       f'{param_type}, found {val_type} at {ctx.start.line}:{ctx.start.column}')
@@ -316,7 +327,7 @@ class PpListener(ParseTreeListener):
                 )
             self.param_index[-1] = self.param_index[-1] + 1
             try:
-                self.semantic_cube.cube[param_type][val_type]["="]
+                self.semantic_cube.get(param_type, val_type, "=")
                 self.quadruples[-1].add_quadruple("push_param", val, None, None)
             except Exception:
                 print(f'Semantic error: Incompatible parameter type. Expected '
@@ -421,7 +432,7 @@ class PpListener(ParseTreeListener):
         val_type = self.quadruples[-1].pop_type()
         return_type = self.symbols_table.get_return_type(self.current_scope)
         try:
-            self.semantic_cube.cube[return_type][val_type]["="]
+            self.semantic_cube.get(return_type, val_type, "=")
             self.quadruples[-1].add_quadruple("return", None, None, val)
         except Exception:
             print(f'Semantic error: Incompatible return type. Expected {return_type} '
@@ -435,7 +446,7 @@ class PpListener(ParseTreeListener):
     def enterExpression0(self, ctx:PpParser.Expression0Context):
         if ctx.STRING_LITERAL() is not None:
             self.quadruples[-1].push_operand(ctx.STRING_LITERAL().getText())
-            self.quadruples[-1].push_type(BasicTypes.STRING)
+            self.quadruples[-1].push_type(Type(BasicTypes.STRING, StructuredTypes.NONE))
 
     # Exit a parse tree produced by PpParser#expression0.
     def exitExpression0(self, ctx:PpParser.Expression0Context):
@@ -458,7 +469,7 @@ class PpListener(ParseTreeListener):
             t_left = self.quadruples[-1].pop_type()
             operator = self.quadruples[-1].pop_operator()
             try:
-                t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
                 temp_register = self.quadruples[-1].new_temp_register()
                 self.quadruples[-1].add_quadruple(
                     operator,
@@ -500,7 +511,7 @@ class PpListener(ParseTreeListener):
             t_left = self.quadruples[-1].pop_type()
             operator = self.quadruples[-1].pop_operator()
             try:
-                t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
                 temp_register = self.quadruples[-1].new_temp_register()
                 self.quadruples[-1].add_quadruple(
                     operator,
@@ -568,7 +579,7 @@ class PpListener(ParseTreeListener):
             t_left = self.quadruples[-1].pop_type()
             operator = self.quadruples[-1].pop_operator()
             try:
-                t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
                 temp_register = self.quadruples[-1].new_temp_register()
                 self.quadruples[-1].add_quadruple(
                     operator,
@@ -618,7 +629,7 @@ class PpListener(ParseTreeListener):
             t_left = self.quadruples[-1].pop_type()
             operator = self.quadruples[-1].pop_operator()
             try:
-                t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
                 temp_register = self.quadruples[-1].new_temp_register()
                 self.quadruples[-1].add_quadruple(
                     operator,
@@ -668,7 +679,7 @@ class PpListener(ParseTreeListener):
             t_left = self.quadruples[-1].pop_type()
             operator = self.quadruples[-1].pop_operator()
             try:
-                t_result = self.semantic_cube.cube[t_left][t_right][operator]
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
                 temp_register = self.quadruples[-1].new_temp_register()
                 self.quadruples[-1].add_quadruple(
                     operator,
@@ -710,13 +721,13 @@ class PpListener(ParseTreeListener):
             self.quadruples[-1].push_operator('(')
         if ctx.INT_NUMBER() is not None:
             self.quadruples[-1].push_operand(ctx.INT_NUMBER().getText())
-            self.quadruples[-1].push_type(BasicTypes.INT)
+            self.quadruples[-1].push_type(Type(BasicTypes.INT, StructuredTypes.NONE))
         if ctx.FLOAT_NUMBER() is not None:
             self.quadruples[-1].push_operand(ctx.FLOAT_NUMBER().getText())
-            self.quadruples[-1].push_type(BasicTypes.FLOAT)
+            self.quadruples[-1].push_type(Type(BasicTypes.FLOAT, StructuredTypes.NONE))
         if ctx.BOOL_LITERAL() is not None:
             self.quadruples[-1].push_operand(ctx.BOOL_LITERAL().getText())
-            self.quadruples[-1].push_type(BasicTypes.BOOL)
+            self.quadruples[-1].push_type(Type(BasicTypes.BOOL, StructuredTypes.NONE))
 
     # Exit a parse tree produced by PpParser#numeric_term0.
     def exitNumeric_term0(self, ctx:PpParser.Numeric_term0Context):
@@ -900,6 +911,21 @@ class PpListener(ParseTreeListener):
     def exitBeta0(self, ctx:PpParser.Beta0Context):
         pass
 
+    def stat_function_call(self, func_name, num_params):
+        for i in range(num_params):
+            arg = self.quadruples[-1].pop_operand()
+            self.quadruples[-1].pop_type()
+            self.quadruples[-1].add_quadruple("push_param", arg, None, None)
+        temp_register = self.quadruples[-1].new_temp_register()
+        self.quadruples[-1].add_quadruple(
+            "stat_func",
+            func_name,
+            num_params,
+            temp_register
+        )
+        self.quadruples[-1].push_operand(temp_register)
+        self.quadruples[-1].push_type(Type(BasicTypes.FLOAT, StructuredTypes.NONE))
+
 
     # Enter a parse tree produced by PpParser#dbeta0.
     def enterDbeta0(self, ctx:PpParser.Dbeta0Context):
@@ -907,7 +933,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dbeta0.
     def exitDbeta0(self, ctx:PpParser.Dbeta0Context):
-        pass
+        self.stat_function_call("dbeta", 3)
 
 
     # Enter a parse tree produced by PpParser#cbeta0.
@@ -916,7 +942,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cbeta0.
     def exitCbeta0(self, ctx:PpParser.Cbeta0Context):
-        pass
+        self.stat_function_call("cbeta", 3)
 
 
     # Enter a parse tree produced by PpParser#rbeta0.
@@ -925,7 +951,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rbeta0.
     def exitRbeta0(self, ctx:PpParser.Rbeta0Context):
-        pass
+        self.stat_function_call("rbeta", 2)
 
 
     # Enter a parse tree produced by PpParser#binom0.
@@ -943,7 +969,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dbinom0.
     def exitDbinom0(self, ctx:PpParser.Dbinom0Context):
-        pass
+        self.stat_function_call("dbinom", 3)
 
 
     # Enter a parse tree produced by PpParser#cbinom0.
@@ -952,7 +978,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cbinom0.
     def exitCbinom0(self, ctx:PpParser.Cbinom0Context):
-        pass
+        self.stat_function_call("cbinom", 3)
 
 
     # Enter a parse tree produced by PpParser#rbinom0.
@@ -961,7 +987,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rbinom0.
     def exitRbinom0(self, ctx:PpParser.Rbinom0Context):
-        pass
+        self.stat_function_call("rbinom", 2)
 
 
     # Enter a parse tree produced by PpParser#exp0.
@@ -979,7 +1005,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dexp0.
     def exitDexp0(self, ctx:PpParser.Dexp0Context):
-        pass
+        self.stat_function_call("dexp", 2)
 
 
     # Enter a parse tree produced by PpParser#cexp0.
@@ -988,7 +1014,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cexp0.
     def exitCexp0(self, ctx:PpParser.Cexp0Context):
-        pass
+        self.stat_function_call("cexp", 2)
 
 
     # Enter a parse tree produced by PpParser#rexp0.
@@ -997,7 +1023,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rexp0.
     def exitRexp0(self, ctx:PpParser.Rexp0Context):
-        pass
+        self.stat_function_call("rexp", 1)
 
 
     # Enter a parse tree produced by PpParser#gamma0.
@@ -1015,7 +1041,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dgamma0.
     def exitDgamma0(self, ctx:PpParser.Dgamma0Context):
-        pass
+        self.stat_function_call("dgamma", 3)
 
 
     # Enter a parse tree produced by PpParser#cgamma0.
@@ -1024,7 +1050,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cgamma0.
     def exitCgamma0(self, ctx:PpParser.Cgamma0Context):
-        pass
+        self.stat_function_call("cgamma", 3)
 
 
     # Enter a parse tree produced by PpParser#rgamma0.
@@ -1033,7 +1059,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rgamma0.
     def exitRgamma0(self, ctx:PpParser.Rgamma0Context):
-        pass
+        self.stat_function_call("rgamma", 2)
 
 
     # Enter a parse tree produced by PpParser#geom0.
@@ -1051,7 +1077,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dgeom0.
     def exitDgeom0(self, ctx:PpParser.Dgeom0Context):
-        pass
+        self.stat_function_call("dgeom", 2)
 
 
     # Enter a parse tree produced by PpParser#cgeom0.
@@ -1060,7 +1086,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cgeom0.
     def exitCgeom0(self, ctx:PpParser.Cgeom0Context):
-        pass
+        self.stat_function_call("cgeom", 2)
 
 
     # Enter a parse tree produced by PpParser#rgeom0.
@@ -1069,7 +1095,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rgeom0.
     def exitRgeom0(self, ctx:PpParser.Rgeom0Context):
-        pass
+        self.stat_function_call("rgeom", 1)
 
 
     # Enter a parse tree produced by PpParser#norm0.
@@ -1087,7 +1113,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dnorm0.
     def exitDnorm0(self, ctx:PpParser.Dnorm0Context):
-        pass
+        self.stat_function_call("dnorm", 3)
 
 
     # Enter a parse tree produced by PpParser#cnorm0.
@@ -1096,7 +1122,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cnorm0.
     def exitCnorm0(self, ctx:PpParser.Cnorm0Context):
-        pass
+        self.stat_function_call("cnorm", 3)
 
 
     # Enter a parse tree produced by PpParser#rnorm0.
@@ -1105,7 +1131,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rnorm0.
     def exitRnorm0(self, ctx:PpParser.Rnorm0Context):
-        pass
+        self.stat_function_call("rnorm", 2)
 
 
     # Enter a parse tree produced by PpParser#pois0.
@@ -1123,7 +1149,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dpois0.
     def exitDpois0(self, ctx:PpParser.Dpois0Context):
-        pass
+        self.stat_function_call("dpois", 2)
 
 
     # Enter a parse tree produced by PpParser#cpois0.
@@ -1132,7 +1158,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cpois0.
     def exitCpois0(self, ctx:PpParser.Cpois0Context):
-        pass
+        self.stat_function_call("cpois", 2)
 
 
     # Enter a parse tree produced by PpParser#rpois0.
@@ -1141,7 +1167,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rpois0.
     def exitRpois0(self, ctx:PpParser.Rpois0Context):
-        pass
+        self.stat_function_call("rpois", 1)
 
 
     # Enter a parse tree produced by PpParser#unif0.
@@ -1159,7 +1185,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#dunif0.
     def exitDunif0(self, ctx:PpParser.Dunif0Context):
-        pass
+        self.stat_function_call("dunif", 3)
 
 
     # Enter a parse tree produced by PpParser#cunif0.
@@ -1168,7 +1194,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#cunif0.
     def exitCunif0(self, ctx:PpParser.Cunif0Context):
-        pass
+        self.stat_function_call("cunif", 3)
 
 
     # Enter a parse tree produced by PpParser#runif0.
@@ -1177,6 +1203,6 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#runif0.
     def exitRunif0(self, ctx:PpParser.Runif0Context):
-        pass
+        self.stat_function_call("runif", 2)
 
 

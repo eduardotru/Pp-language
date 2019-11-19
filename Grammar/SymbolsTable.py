@@ -9,6 +9,27 @@ class BasicTypes(Enum):
     FLOAT = "float"
     VOID = "void"
 
+class StructuredTypes(Enum):
+    NONE = "none"
+    MATRIX = "matrix"
+    # Not yet supported
+    # DATASET = "dataset"
+
+
+class Type:
+    def __init__(self, basic_type, struct_type, rows = None, cols = None):
+        self.basic_type = basic_type
+        self.struct_type = struct_type
+        self.rows = rows
+        self.cols = cols
+
+    def __str__(self):
+        struct_type_value = self.struct_type.value
+        if struct_type_value == "none":
+            struct_type_value = ""
+        dims = "" if struct_type_value == "" else f"[{self.rows}][{self.cols}]"
+        return f"{struct_type_value}<{self.basic_type.value}{dims}>"
+
 
 class Function:
     def __init__(self, name, return_type, parameters, memory_dir):
@@ -63,6 +84,8 @@ class SymbolsTable:
                 name, data_type, scope, self.memory_pointer)
             self.dir_to_memory_dict[self.memory_pointer] = name
             self.memory_pointer = self.memory_pointer + 1
+    
+
 
     def exists_variable(self, name, scope):
         if name in self.functions[scope].variables or name in self.functions["program"].variables:
@@ -114,11 +137,11 @@ class SymbolsTable:
         for i in self.functions:
             func = self.functions[i]
             ret += "-----> " + func.name + " : " + \
-                func.return_type.value + " @ " + str(func.memory_dir) + "\n"
+                str(func.return_type) + " @ " + str(func.memory_dir) + "\n"
             for j in self.functions[func.name].variables:
                 variable = self.functions[func.name].variables[j]
                 ret += "NAME: " + variable.name + "\n"
-                ret += "TYPE: " + variable.type.value + "\n\n"
+                ret += "TYPE: " + str(variable.type) + "\n\n"
 
             ret += "\n"
 

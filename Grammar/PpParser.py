@@ -603,6 +603,7 @@ class PpParser ( Parser ):
         self.checkVersion("4.7.2")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
+        self._errHandler = BailErrorStrategy()
 
 
 
