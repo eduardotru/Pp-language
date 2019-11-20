@@ -78,11 +78,17 @@ class SymbolsTable:
         self.locVarInt = 100000
         self.locVarFloat = 101000
         self.locVarBool = 102000
-        self.locVarSring = 103000
+        self.locVarString = 103000
         self.locMatInt = 110000
         self.locMatFloat = 111000
         self.locMatBool = 112000
         self.locMatString = 113000
+
+        # Just for reference, used in quadruples
+        self.globTempInt = 130000
+        self.globTempFloat = 131000
+        self.globTempBool = 132000
+        self.globTempString = 133000
 
     def add_function(self, name, return_type, parameters):
         if name in self.functions:
@@ -108,11 +114,60 @@ class SymbolsTable:
         if name in self.functions[scope].variables:
             raise Exception("The variable already exists in this scope.")
         else:
-            if (data_type.basic_type == BasicTypes.INT):
-                ptr = self.globVarInt
-                self.globVarInt += 1
+            if scope == "program":
+                if data_type.struct_type == StructuredTypes.NONE:
+                    if data_type.basic_type == BasicTypes.INT:
+                        ptr = self.globVarInt
+                        self.globVarInt += 1
+                    elif data_type.basic_type == BasicTypes.FLOAT:
+                        ptr = self.globVarFloat
+                        self.globVarFloat += 1
+                    elif data_type.basic_type == BasicTypes.BOOL:
+                        ptr = self.globVarBool
+                        self.globVarBool += 1
+                    elif data_type.basic_type == BasicTypes.STRING:
+                        ptr = self.globVarString
+                        self.globVarString += 1
+                elif data_type.struct_type == StructuredTypes.MATRIX:
+                    if data_type.basic_type == BasicTypes.INT:
+                        ptr = self.globMatInt
+                        self.globMatInt += 1
+                    elif data_type.basic_type == BasicTypes.FLOAT:
+                        ptr = self.globMatFloat
+                        self.globMatFloat += 1
+                    elif data_type.basic_type == BasicTypes.BOOL:
+                        ptr = self.globMatBool
+                        self.globMatBool += 1
+                    elif data_type.basic_type == BasicTypes.STRING:
+                        ptr = self.globMatString
+                        self.globMatString += 1
             else:
-                ptr = 0
+                if data_type.struct_type == StructuredTypes.NONE:
+                    if data_type.basic_type == BasicTypes.INT:
+                        ptr = self.locVarInt
+                        self.locVarInt += 1
+                    elif data_type.basic_type == BasicTypes.FLOAT:
+                        ptr = self.locVarFloat
+                        self.locVarFloat += 1
+                    elif data_type.basic_type == BasicTypes.BOOL:
+                        ptr = self.locVarBool
+                        self.locVarBool += 1
+                    elif data_type.basic_type == BasicTypes.STRING:
+                        ptr = self.locVarString
+                        self.locVarString += 1
+                elif data_type.struct_type == StructuredTypes.MATRIX:
+                    if data_type.basic_type == BasicTypes.INT:
+                        ptr = self.locMatInt
+                        self.locMatInt += 1
+                    elif data_type.basic_type == BasicTypes.FLOAT:
+                        ptr = self.locMatFloat
+                        self.locMatFloat += 1
+                    elif data_type.basic_type == BasicTypes.BOOL:
+                        ptr = self.locMatBool
+                        self.locMatBool += 1
+                    elif data_type.basic_type == BasicTypes.STRING:
+                        ptr = self.locMatString
+                        self.locMatString += 1
             var = Variable(name, data_type, scope, ptr)
             self.functions[scope].variables[name] = var
             self.dir_to_memory_dict[ptr] = name
