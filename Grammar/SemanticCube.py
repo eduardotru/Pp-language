@@ -27,6 +27,8 @@ class SemanticCube:
             self.cube[BasicTypes.FLOAT][BasicTypes.FLOAT][int_float_op] = BasicTypes.FLOAT
         # Overwrite division as it is float division
         self.cube[BasicTypes.INT][BasicTypes.INT]['/'] = BasicTypes.FLOAT
+        # Overwrite assignment to int
+        self.cube[BasicTypes.INT][BasicTypes.FLOAT]['='] = BasicTypes.INT
         
         for int_int_op in self.INT_INT_OPERATORS: 
             self.cube[BasicTypes.INT][BasicTypes.INT][int_int_op] = BasicTypes.INT
@@ -64,6 +66,8 @@ class SemanticCube:
             result_type = Type(
                 self.cube[op1.basic_type][op2.basic_type][operator],
                 self.cube[op1.basic_type][op2.struct_type][operator],
+                op2.rows,
+                op2.cols
             )
             return result_type
         elif op2.struct_type ==StructuredTypes.NONE:
@@ -72,6 +76,8 @@ class SemanticCube:
             result_type = Type(
                 self.cube[op1.basic_type][op2.basic_type][operator],
                 self.cube[op1.struct_type][op2.basic_type][operator],
+                op1.rows,
+                op1.cols
             )
             return result_type
         else:

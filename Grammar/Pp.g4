@@ -9,11 +9,11 @@ r : program0 ;
 
 // Regular Expressions
 
-ID : '_'?[a-zA-Z][a-zA-Z0-9_]* ;
 INT_NUMBER : [+|-]?[0-9]+ ;
 FLOAT_NUMBER : [+|-]?[0-9]+'.'([0-9]+)?('E'[+|-]?[0-9]+)? ;
 STRING_LITERAL : '"'.*?'"' ;
 BOOL_LITERAL : 'true' | 'false' ;
+ID : '_'?[a-zA-Z][a-zA-Z0-9_]* ;
 WS : [\t\r\n ]+ -> skip ;
 
 // Grammar
@@ -234,10 +234,10 @@ exponent0 :
   ;
 
 numeric_term0 :
-  sign0 numeric_term1
-  | INT_NUMBER
+  INT_NUMBER
   | FLOAT_NUMBER
   | BOOL_LITERAL
+  | sign0 numeric_term1
   |  '(' bool_exp0 ')'
   ;
 

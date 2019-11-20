@@ -35,8 +35,8 @@ class PpListener(ParseTreeListener):
         cols = None
         if ctx.getText().startswith("matrix"):
             struct_type = StructuredTypes.MATRIX
-            rows = ctx.INT_NUMBER(0)
-            cols = ctx.INT_NUMBER(1)
+            rows = int(ctx.INT_NUMBER(0).getText())
+            cols = int(ctx.INT_NUMBER(1).getText())
         return Type(basic_type, struct_type, rows, cols)
     
     # Enter a parse tree produced by PpParser#r.
@@ -45,7 +45,6 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#r.
     def exitR(self, ctx:PpParser.RContext):
-        print(self.symbols_table)
         self.quadruples[-1].add_quadruple("exit", None, None, None)
         self.obj.add_global_quadruples(self.quadruples[-1])
         self.obj.gen_obj_file(self.symbols_table)
@@ -842,8 +841,35 @@ class PpListener(ParseTreeListener):
         pass
 
 
-    def generate_matrix_quads(self):
-        print(self.matrix_literal)
+    def generate_matrix_quads(self, ctx):
+        self.matrix_literal = [arr[::-1] for arr in self.matrix_literal]
+        rows = len(self.matrix_literal)
+        cols = len(self.matrix_literal[0])
+        basic_type = self.matrix_literal[0][0][1]
+        for arr in self.matrix_literal:
+            if cols != len(arr):
+                print(f"Semantic error: Matrix literal has extranous dimensions "
+                      f"at {ctx.start.line}:{ctx.start.column}")
+                exit()
+            for ptr, elem_type in arr:
+                try:
+                    basic_type = self.semantic_cube.get(basic_type, elem_type, "=")
+                    if elem_type.basic_type == BasicTypes.FLOAT:
+                        basic_type = Type(BasicTypes.FLOAT, StructuredTypes.NONE)
+                except Exception:
+                    print(f"Semantic error: Matrix literal has incompatible types "
+                          f"at {ctx.start.line}:{ctx.start.column}")
+                    exit()
+        
+        temp_type = Type(basic_type.basic_type, StructuredTypes.MATRIX, rows, cols)
+        temp_mat = self.quadruples[-1].new_temp_register(temp_type)
+        for i in range(rows):
+            for j in range(cols):
+                temp_mat_elem = self.quadruples[-1].new_temp_register(Type(basic_type.basic_type, StructuredTypes.NONE))
+                self.quadruples[-1].add_quadruple(temp_mat, i, j, temp_mat_elem)
+                self.quadruples[-1].add_quadruple("=", self.matrix_literal[i][j][0], None, temp_mat_elem)
+        self.quadruples[-1].push_operand(temp_mat)
+        self.quadruples[-1].push_type(temp_type)
 
     # Enter a parse tree produced by PpParser#matrix_literal0.
     def enterMatrix_literal0(self, ctx:PpParser.Matrix_literal0Context):
@@ -851,7 +877,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#matrix_literal0.
     def exitMatrix_literal0(self, ctx:PpParser.Matrix_literal0Context):
-        self.generate_matrix_quads()
+        self.generate_matrix_quads(ctx)
 
 
     # Enter a parse tree produced by PpParser#matrix_literal1.

@@ -1,5 +1,8 @@
-let matrix<float>[3][3] A, B;
+let matrix<float>[3][3] A;
+let matrix<float>[3][1] B;
 let int i, j;
+
+B = A*B;
 
 A = [
   [1,2,3],
