@@ -26,6 +26,7 @@ class PpListener(ParseTreeListener):
         self.block_reason = []
         self.param_index = []
         self.function_call_stack = []
+        self.matrix_literal = []
 
     def get_type(self, ctx):
         basic_type = BasicTypes(ctx.basic_type0().getText())
@@ -278,7 +279,7 @@ class PpListener(ParseTreeListener):
     def exitFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
         self.quadruples[-1].add_quadruple(
             "era",
-            self.symbols_table.get_function_memory(self.function_call_stack[-1]),
+            self.function_call_stack[-1],
             None,
             None,
         )
@@ -388,7 +389,12 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#input0.
     def enterInput0(self, ctx:PpParser.Input0Context):
-        self.quadruples[-1].add_quadruple("read", None, None, ctx.ID().getText())
+        if not self.symbols_table.exists_variable(ctx.ID().getText(), self.current_scope):
+            print(f"Semantic error: Use of undefined variable {ctx.ID().getText()}"
+                f" at {ctx.start.line}:{ctx.start.column}")
+            exit()
+        memory_dir = self.symbols_table.name_to_dir(ctx.ID().getText(), self.current_scope)
+        self.quadruples[-1].add_quadruple("read", None, None, memory_dir)
 
     # Exit a parse tree produced by PpParser#input0.
     def exitInput0(self, ctx:PpParser.Input0Context):
@@ -836,18 +842,22 @@ class PpListener(ParseTreeListener):
         pass
 
 
+    def generate_matrix_quads(self):
+        print(self.matrix_literal)
+
     # Enter a parse tree produced by PpParser#matrix_literal0.
     def enterMatrix_literal0(self, ctx:PpParser.Matrix_literal0Context):
-        pass
+        self.matrix_literal = []
 
     # Exit a parse tree produced by PpParser#matrix_literal0.
     def exitMatrix_literal0(self, ctx:PpParser.Matrix_literal0Context):
-        pass
+        self.generate_matrix_quads()
 
 
     # Enter a parse tree produced by PpParser#matrix_literal1.
     def enterMatrix_literal1(self, ctx:PpParser.Matrix_literal1Context):
-        pass
+        if ctx.matrix_literal2():
+            self.matrix_literal.append([])
 
     # Exit a parse tree produced by PpParser#matrix_literal1.
     def exitMatrix_literal1(self, ctx:PpParser.Matrix_literal1Context):
@@ -860,12 +870,19 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#matrix_literal2.
     def exitMatrix_literal2(self, ctx:PpParser.Matrix_literal2Context):
-        pass
+        if ctx.expression0():
+            self.matrix_literal[-1].append(
+                (
+                    self.quadruples[-1].pop_operand(),
+                    self.quadruples[-1].pop_type()
+                )
+            )
 
 
     # Enter a parse tree produced by PpParser#matrix_literal3.
     def enterMatrix_literal3(self, ctx:PpParser.Matrix_literal3Context):
-        pass
+        if ctx.matrix_literal2():
+            self.matrix_literal.append([])
 
     # Exit a parse tree produced by PpParser#matrix_literal3.
     def exitMatrix_literal3(self, ctx:PpParser.Matrix_literal3Context):
@@ -878,7 +895,13 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#matrix_literal4.
     def exitMatrix_literal4(self, ctx:PpParser.Matrix_literal4Context):
-        pass
+        if ctx.expression0():
+            self.matrix_literal[-1].append(
+                (
+                    self.quadruples[-1].pop_operand(),
+                    self.quadruples[-1].pop_type()
+                )
+            )
 
 
     # Enter a parse tree produced by PpParser#stat_functions0.
