@@ -33,13 +33,12 @@ class Type:
 
 
 class Function:
-    def __init__(self, name, return_type, parameters, memory_dir):
+    def __init__(self, name, return_type, parameters):
         self.name = name
         self.return_type = return_type
         self.parameters = []
         self.variables = parameters
         self.memory_size = 0
-        self.memory_dir = memory_dir
 
 
 class Variable:
@@ -52,10 +51,6 @@ class Variable:
 
 class SymbolsTable:
     def __init__(self):
-        self.memory_pointer = 0
-        self.dir_to_memory_dict = {}
-        self.functions = {}
-        self.add_function("program", BasicTypes.VOID, {})
         self.globVarInt = 0
         self.globVarFloat = 1000
         self.globVarBool = 2000
@@ -90,15 +85,18 @@ class SymbolsTable:
         self.globTempBool = 132000
         self.globTempString = 133000
 
+        self.constants = Function("constants", BasicTypes.VOID, {})
+        self.dir_to_memory_dict = {}
+        self.functions = {}
+        self.add_function("program", BasicTypes.VOID, {})
+
     def add_function(self, name, return_type, parameters):
         if name in self.functions:
             raise Exception("The function already exists.")
         else:
             self.functions[name] = Function(
-                name, return_type, {}, self.memory_pointer)
+                name, return_type, {})
             self.functions[name].parameters = parameters
-            self.dir_to_memory_dict[self.memory_pointer] = name
-            self.memory_pointer = self.memory_pointer + 1
             for parameter in parameters:
                 self.add_variable(
                     parameter.name, parameter.type, name)
@@ -177,28 +175,44 @@ class SymbolsTable:
             return True
         return False
 
-    def add_constant(self, value, type):
-        pass
+    def add_constant(self, value, data_type):
+        if value in self.constants.variables:
+            raise Exception("The contant already exists in this scope.")
+        else:
+            if data_type.basic_type == BasicTypes.INT:
+                ptr = self.constInt
+                self.constInt += 1
+            elif data_type.basic_type == BasicTypes.FLOAT:
+                ptr = self.constFloat
+                self.constFloat += 1
+            elif data_type.basic_type == BasicTypes.BOOL:
+                ptr = self.constBool
+                self.constBool += 1
+            elif data_type.basic_type == BasicTypes.STRING:
+                ptr = self.constString
+                self.constString += 1
+
+            var = Variable(value, data_type, "program", ptr)
+            self.constants.variables[value] = var
+            self.dir_to_memory_dict[ptr] = value
 
     def exists_constant(self, value):
-        pass
+        if value in self.constants.variables:
+            return True
+        else:
+            return False
 
     def constant_to_dir(self, value):
-        pass
+        if self.exists_constant(value):
+            return self.constants.variables[value].memory_dir
 
     def dir_to_name(self, memory_dir):
-        if memory_dir >= self.memory_pointer:
-            raise Exception("Memory direction empty.")
-        elif memory_dir < 0:
-            raise Exception("Memory direction invalid.")
         return self.dir_to_memory_dict[memory_dir]
 
     def name_to_dir(self, name, scope):
         if self.exists_variable(name, scope):
             if name in self.functions[scope].variables:
                 return self.functions[scope].variables[name].memory_dir
-            else:
-                return self.functions["program"].variables[name].memory_dir
         else:
             raise Exception("Variable does not exist in this scope.")
 
@@ -207,8 +221,6 @@ class SymbolsTable:
         if self.exists_variable(name, scope):
             if name in self.functions[scope].variables:
                 return self.functions[scope].variables[name].type
-            else:
-                return self.functions["program"].variables[name].type
         else:
             raise Exception("Variable does not exist in this scope.")
 
@@ -216,8 +228,6 @@ class SymbolsTable:
         return self.functions[name].return_type
 
     def get_function_param_type(self, name, index):
-        print(self.functions[name].parameters)
-        print(index)
         return self.functions[name].parameters[index].type
 
     def set_function_memory(self, name, temp_memory):
@@ -232,7 +242,7 @@ class SymbolsTable:
         for i in self.functions:
             func = self.functions[i]
             ret += "-----> " + func.name + " : " + \
-                str(func.return_type) + " @ " + str(func.memory_dir) + "\n"
+                str(func.return_type) + "\n"
             for j in self.functions[func.name].variables:
                 variable = self.functions[func.name].variables[j]
                 ret += "NAME: " + variable.name + "\n"

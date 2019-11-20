@@ -16,20 +16,28 @@ class ObjGenerator:
     def joinQuads(self, programQuads, symbols_table):
         ret = ""
         retQuads = []
+        origin = []
         for quad in programQuads:
             retQuads.append(quad)
-        funStarts = {}
+            origin.append("program")
+        funStarts = {"program": 0}
         for key in self.functions:
             funStarts[key] = len(retQuads)
             for quad in self.functions[key].quadruples:
                 retQuads.append(quad)
+                origin.append(key)
 
         for i in range(len(retQuads)):
             quad = retQuads[i]
             if quad.op == "gosub":
                 ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
-                    "\t\t\t" + "\t\t" + "\t\t" + \
-                    str(funStarts[quad.res]) + "\n"
+                    "\t\t" + str(quad.left) + "\t\t" + \
+                    str(quad.right) + "\t\t" + str(funStarts[quad.res]) + "\n"
+            elif quad.op == "goto" or quad.op == "gotof":
+                ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
+                    "\t\t" + str(quad.left) + "\t\t" + \
+                    str(quad.right) + "\t\t" + \
+                    str(quad.res + funStarts[origin[i]]) + "\n"
             else:
                 ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
                     "\t\t" + str(quad.left) + "\t\t" + \
@@ -39,7 +47,10 @@ class ObjGenerator:
         return ret
 
     def gen_obj_file(self, symbols_table):
-        print("==================QUADRUPLES by Pp==================")
-        print("#\t\tOp\t\tLeft\t\tRight\t\tRes\n")
-        print(self.joinQuads(self.program.quadruples, symbols_table))
-        print("======================================")
+        ret = "==================QUADRUPLES by Pp==================\n"
+        ret += "#\t\tOp\t\tLeft\t\tRight\t\tRes\n"
+        ret += self.joinQuads(self.program.quadruples, symbols_table)
+        ret += "======================================"
+        f = open("out.txt", "w")
+        f.write(ret)
+        f.close()

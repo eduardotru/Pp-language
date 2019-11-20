@@ -1,0 +1,28 @@
+==================QUADRUPLES by Pp==================
+#		Op		Left		Right		Res
+0		write		None		None		"Which Fibonacci number do you want?"
+1		read		None		None		fib
+2		<		0		20001		32000
+3		gotof		32000		None		6
+4		write		None		None		"Invalid number"
+5		goto		None		None		10
+6		push_param		0		None		None
+7		era		5		None		None
+8		gosub		None		None		11
+9		write		None		None		retVal
+10		exit		None		None		None
+11		=		pop_param		None		100000
+12		=		20000		None		100001
+13		=		20000		None		100002
+14		=		20001		None		100003
+15		<		100003		100000		132000
+16		gotof		132000		None		24
+17		=		100002		None		100004
+18		+		100001		100002		130000
+19		=		130000		None		100002
+20		=		100002		None		100001
+21		+		100003		20000		130001
+22		=		130001		None		100003
+23		goto		None		None		15
+24		return		None		None		100001
+======================================
