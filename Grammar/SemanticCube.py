@@ -38,6 +38,11 @@ class SemanticCube:
             self.cube[BasicTypes.INT][StructuredTypes.MATRIX][matrix_matrix_op] = StructuredTypes.MATRIX
             self.cube[BasicTypes.FLOAT][StructuredTypes.MATRIX][matrix_matrix_op] = StructuredTypes.MATRIX
 
+        del self.cube[BasicTypes.INT][StructuredTypes.MATRIX]['=']
+        del self.cube[BasicTypes.FLOAT][StructuredTypes.MATRIX]['=']
+        del self.cube[StructuredTypes.MATRIX][BasicTypes.INT]['=']
+        del self.cube[StructuredTypes.MATRIX][BasicTypes.FLOAT]['=']
+
         for matrix_int_op in self.MATRIX_INT_OPERATORS:
             self.cube[StructuredTypes.MATRIX][BasicTypes.INT][matrix_int_op] = StructuredTypes.MATRIX
 
@@ -48,29 +53,37 @@ class SemanticCube:
             for t2 in supported_types:
                 self.cube[t1][t2] = {}
 
-    def get(self, op1, op2, operand):
+    def get(self, op1, op2, operator):
         if op1.struct_type == StructuredTypes.NONE and op2.struct_type == StructuredTypes.NONE:
             result_type = Type(
-                self.cube[op1.basic_type][op2.basic_type][operand],
+                self.cube[op1.basic_type][op2.basic_type][operator],
                 StructuredTypes.NONE,
             )
             return result_type
         elif op1.struct_type == StructuredTypes.NONE:
             result_type = Type(
-                self.cube[op1.basic_type][op2.basic_type][operand],
-                self.cube[op1.basic_type][op2.struct_type][operand],
+                self.cube[op1.basic_type][op2.basic_type][operator],
+                self.cube[op1.basic_type][op2.struct_type][operator],
             )
             return result_type
         elif op2.struct_type ==StructuredTypes.NONE:
+            if operator == "^" and op1.rows != op1.cols:
+                raise Exception("Exponentiation can only be on square matrices")
             result_type = Type(
-                self.cube[op1.basic_type][op2.basic_type][operand],
-                self.cube[op1.struct_type][op2.basic_type][operand],
+                self.cube[op1.basic_type][op2.basic_type][operator],
+                self.cube[op1.struct_type][op2.basic_type][operator],
             )
             return result_type
         else:
+            if operator in {"=", "+", "-"}:
+                assert(op1.rows == op2.rows and op1.cols == op2.cols)
+            elif operator == "*":
+                assert(op1.cols == op2.rows)
             result_type = Type(
-                self.cube[op1.basic_type][op2.basic_type][operand],
-                self.cube[op1.struct_type][op2.struct_type][operand],
+                self.cube[op1.basic_type][op2.basic_type][operator],
+                self.cube[op1.struct_type][op2.struct_type][operator],
+                op1.rows,
+                op2.cols,
             )
             return result_type
 

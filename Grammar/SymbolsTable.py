@@ -31,6 +31,9 @@ class Type:
         dims = "" if struct_type_value == "" else f"[{self.rows}][{self.cols}]"
         return f"{struct_type_value}<{self.basic_type.value}{dims}>"
 
+    def __repr__(self):
+        return str(self)
+
 
 class Function:
     def __init__(self, name, return_type, parameters):
