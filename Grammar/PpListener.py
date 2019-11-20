@@ -471,7 +471,7 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples[-1].pop_operator()
             try:
                 t_result = self.semantic_cube.get(t_left, t_right, operator)
-                temp_register = self.quadruples[-1].new_temp_register()
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
                 self.quadruples[-1].add_quadruple(
                     operator,
                     left,
@@ -513,7 +513,7 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples[-1].pop_operator()
             try:
                 t_result = self.semantic_cube.get(t_left, t_right, operator)
-                temp_register = self.quadruples[-1].new_temp_register()
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
                 self.quadruples[-1].add_quadruple(
                     operator,
                     left,
@@ -581,7 +581,7 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples[-1].pop_operator()
             try:
                 t_result = self.semantic_cube.get(t_left, t_right, operator)
-                temp_register = self.quadruples[-1].new_temp_register()
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
                 self.quadruples[-1].add_quadruple(
                     operator,
                     left,
@@ -631,7 +631,7 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples[-1].pop_operator()
             try:
                 t_result = self.semantic_cube.get(t_left, t_right, operator)
-                temp_register = self.quadruples[-1].new_temp_register()
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
                 self.quadruples[-1].add_quadruple(
                     operator,
                     left,
@@ -681,7 +681,7 @@ class PpListener(ParseTreeListener):
             operator = self.quadruples[-1].pop_operator()
             try:
                 t_result = self.semantic_cube.get(t_left, t_right, operator)
-                temp_register = self.quadruples[-1].new_temp_register()
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
                 self.quadruples[-1].add_quadruple(
                     operator,
                     left,
@@ -940,7 +940,7 @@ class PpListener(ParseTreeListener):
             arg = self.quadruples[-1].pop_operand()
             self.quadruples[-1].pop_type()
             self.quadruples[-1].add_quadruple("push_param", arg, None, None)
-        temp_register = self.quadruples[-1].new_temp_register()
+        temp_register = self.quadruples[-1].new_temp_register(Type(ret_type, StructuredTypes.NONE))
         self.quadruples[-1].add_quadruple(
             "stat_func",
             func_name,

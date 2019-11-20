@@ -1,3 +1,5 @@
+from SymbolsTable import BasicTypes, StructuredTypes
+
 class Quadruple:
     def __init__(self, op, left, right, res):
         self.op = op
@@ -7,7 +9,7 @@ class Quadruple:
 
 
 class Quadruples:
-    def __init__(self):
+    def __init__(self, isFunc = True):
         self.poper = []
         self.pilao = []
         self.psaltos = []
@@ -15,9 +17,45 @@ class Quadruples:
         self.quadruples = []
         self.temp_register_ptr = 0
 
-    def new_temp_register(self):
-        ret = "t" + str(self.temp_register_ptr)
-        self.temp_register_ptr = self.temp_register_ptr + 1
+        padding = 0 if not isFunc else 100000
+        
+        self.tempInt = 30000 + padding
+        self.tempFloat = 31000 + padding
+        self.tempBool = 32000 + padding
+        self.tempString = 33000 + padding
+        self.matTempInt = 40000 + padding
+        self.matTempFloat = 41000 + padding
+        self.matTempBool = 42000 + padding
+        self.matTempString = 43000 + padding
+
+    def new_temp_register(self, register_type):
+        ret = None
+        if register_type.struct_type == StructuredTypes.MATRIX:
+            if register_type.basic_type == BasicTypes.INT:
+                ret = self.matTempInt
+                self.matTempInt += 1
+            elif register_type.basic_type == BasicTypes.FLOAT:
+                ret = self.matTempFloat
+                self.matTempFloat += 1
+            elif register_type.basic_type == BasicTypes.BOOL:
+                ret = self.matTempBool
+                self.matTempBool += 1
+            elif register_type.basic_type == BasicTypes.STRING:
+                ret = self.matTempString
+                self.matTempString += 1
+        elif register_type.struct_type == StructuredTypes.NONE:
+            if register_type.basic_type == BasicTypes.INT:
+                ret = self.tempInt
+                self.tempInt += 1
+            elif register_type.basic_type == BasicTypes.FLOAT:
+                ret = self.tempFloat
+                self.tempFloat += 1
+            elif register_type.basic_type == BasicTypes.BOOL:
+                ret = self.tempBool
+                self.tempBool += 1
+            elif register_type.basic_type == BasicTypes.STRING:
+                ret = self.tempString
+                self.tempString += 1
         return ret
 
     def get_quad_count(self):

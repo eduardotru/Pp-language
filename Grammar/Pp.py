@@ -16,6 +16,6 @@ stream = CommonTokenStream(lexer)
 parser = PpParser(stream)
 tree = parser.r()
 listener = PpListener(SymbolsTable(), SemanticCube(),
-                      Quadruples(), ObjGenerator())
+                      Quadruples(isFunc=False), ObjGenerator())
 walker = ParseTreeWalker()
 walker.walk(listener, tree)
