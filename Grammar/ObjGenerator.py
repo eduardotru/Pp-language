@@ -1,3 +1,6 @@
+from Quadruples import Quadruple
+
+
 class ObjGenerator:
     def __init__(self):
         self.functions = {}
@@ -10,18 +13,28 @@ class ObjGenerator:
     def add_global_quadruples(self, quadruples):
         self.program = quadruples
 
-    def joinQuads(self, quads, symbols_table):
+    def joinQuads(self, programQuads, symbols_table):
         ret = ""
-        for i in range(len(quads)):
-            quad = quads[i]
+        retQuads = []
+        for quad in programQuads:
+            retQuads.append(quad)
+        funStarts = {}
+        for key in self.functions:
+            funStarts[key] = len(retQuads)
+            for quad in self.functions[key].quadruples:
+                retQuads.append(quad)
+
+        for i in range(len(retQuads)):
+            quad = retQuads[i]
             if quad.op == "gosub":
-                ret += self.joinQuads(
-                    self.functions[quad.res].quadruples, symbols_table)
+                ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
+                    "\t\t\t" + "\t\t" + "\t\t" + \
+                    str(funStarts[quad.res]) + "\n"
             else:
                 ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
                     "\t\t" + str(quad.left) + "\t\t" + \
                     str(quad.right) + "\t\t" + str(quad.res) + "\n"
-                self.instruction_ptr = self.instruction_ptr + 1
+            self.instruction_ptr = self.instruction_ptr + 1
 
         return ret
 

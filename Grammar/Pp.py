@@ -10,14 +10,12 @@ from SemanticCube import SemanticCube
 from Quadruples import Quadruples
 from ObjGenerator import ObjGenerator
 
-try:
-    pp_file = FileStream(sys.argv[1])
-    lexer = PpLexer(pp_file)
-    stream = CommonTokenStream(lexer)
-    parser = PpParser(stream)
-    tree = parser.r()
-    listener = PpListener(SymbolsTable(), SemanticCube(), Quadruples(), ObjGenerator())
-    walker = ParseTreeWalker()
-    walker.walk(listener, tree)
-except:
-    exit()
+pp_file = FileStream(sys.argv[1])
+lexer = PpLexer(pp_file)
+stream = CommonTokenStream(lexer)
+parser = PpParser(stream)
+tree = parser.r()
+listener = PpListener(SymbolsTable(), SemanticCube(),
+                      Quadruples(), ObjGenerator())
+walker = ParseTreeWalker()
+walker.walk(listener, tree)
