@@ -45,6 +45,7 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#r.
     def exitR(self, ctx:PpParser.RContext):
         print(self.symbols_table)
+        self.quadruples[-1].add_quadruple("exit", None, None, None)
         self.obj.add_global_quadruples(self.quadruples[-1])
         self.obj.gen_obj_file(self.symbols_table)
 
