@@ -84,13 +84,20 @@ class SymbolsTable:
                 name, data_type, scope, self.memory_pointer)
             self.dir_to_memory_dict[self.memory_pointer] = name
             self.memory_pointer = self.memory_pointer + 1
-    
-
 
     def exists_variable(self, name, scope):
         if name in self.functions[scope].variables or name in self.functions["program"].variables:
             return True
         return False
+
+    def add_constant(self, value, type):
+        pass
+
+    def exists_constant(self, value):
+        pass
+
+    def constant_to_dir(self, value):
+        pass
 
     def dir_to_name(self, memory_dir):
         if memory_dir >= self.memory_pointer:
