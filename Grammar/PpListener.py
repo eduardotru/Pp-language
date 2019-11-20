@@ -446,8 +446,16 @@ class PpListener(ParseTreeListener):
     # Enter a parse tree produced by PpParser#expression0.
     def enterExpression0(self, ctx:PpParser.Expression0Context):
         if ctx.STRING_LITERAL() is not None:
-            self.quadruples[-1].push_operand(ctx.STRING_LITERAL().getText())
-            self.quadruples[-1].push_type(Type(BasicTypes.STRING, StructuredTypes.NONE))
+            string_lit = ctx.STRING_LITERAL().getText()
+            string_type = Type(BasicTypes.STRING, StructuredTypes.NONE)
+
+            if not self.symbols_table.exists_constant(string_lit):
+                self.symbols_table.add_constant(string_lit, string_type)
+
+            constant_address = self.symbols_table.constant_to_dir(string_lit)
+
+            self.quadruples[-1].push_operand(constant_address)
+            self.quadruples[-1].push_type(string_type)
 
     # Exit a parse tree produced by PpParser#expression0.
     def exitExpression0(self, ctx:PpParser.Expression0Context):
