@@ -721,14 +721,37 @@ class PpListener(ParseTreeListener):
         if ctx.bool_exp0() is not None:
             self.quadruples[-1].push_operator('(')
         if ctx.INT_NUMBER() is not None:
-            self.quadruples[-1].push_operand(ctx.INT_NUMBER().getText())
-            self.quadruples[-1].push_type(Type(BasicTypes.INT, StructuredTypes.NONE))
+            int_num = ctx.INT_NUMBER().getText()
+            int_type = Type(BasicTypes.INT, StructuredTypes.NONE)
+            
+            if not self.symbols_table.exists_constant(int_num):
+                self.symbols_table.add_constant(int_num, int_type)
+
+            constant_address = self.symbols_table.constant_to_dir(int_num)
+            self.quadruples[-1].push_operand(constant_address)
+            self.quadruples[-1].push_type(int_type)
+
         if ctx.FLOAT_NUMBER() is not None:
-            self.quadruples[-1].push_operand(ctx.FLOAT_NUMBER().getText())
-            self.quadruples[-1].push_type(Type(BasicTypes.FLOAT, StructuredTypes.NONE))
+            float_num = ctx.FLOAT_NUMBER().getText()
+            float_type = Type(BasicTypes.FLOAT, StructuredTypes.NONE)
+            
+            if not self.symbols_table.exists_constant(float_num):
+                self.symbols_table.add_constant(float_num, float_type)
+
+            constant_address = self.symbols_table.constant_to_dir(float_num)
+            self.quadruples[-1].push_operand(constant_address)
+            self.quadruples[-1].push_type(float_type)
+
         if ctx.BOOL_LITERAL() is not None:
-            self.quadruples[-1].push_operand(ctx.BOOL_LITERAL().getText())
-            self.quadruples[-1].push_type(Type(BasicTypes.BOOL, StructuredTypes.NONE))
+            bool_lit = ctx.BOOL_LITERAL().getText()
+            bool_type = Type(BasicTypes.BOOL, StructuredTypes.NONE)
+            if not self.symbols_table.exists_constant(bool_lit):
+                self.symbols_table.add_constant(bool_lit, bool_type)
+
+            constant_address = self.symbols_table.constant_to_dir(bool_lit)
+
+            self.quadruples[-1].push_operand(constant_address)
+            self.quadruples[-1].push_type(bool_type)
 
     # Exit a parse tree produced by PpParser#numeric_term0.
     def exitNumeric_term0(self, ctx:PpParser.Numeric_term0Context):
@@ -912,8 +935,8 @@ class PpListener(ParseTreeListener):
     def exitBeta0(self, ctx:PpParser.Beta0Context):
         pass
 
-    def stat_function_call(self, func_name, num_params):
-        for i in range(num_params):
+    def stat_function_call(self, func_name, num_params, ret_type = BasicTypes.FLOAT):
+        for _ in range(num_params):
             arg = self.quadruples[-1].pop_operand()
             self.quadruples[-1].pop_type()
             self.quadruples[-1].add_quadruple("push_param", arg, None, None)
@@ -925,7 +948,7 @@ class PpListener(ParseTreeListener):
             temp_register
         )
         self.quadruples[-1].push_operand(temp_register)
-        self.quadruples[-1].push_type(Type(BasicTypes.FLOAT, StructuredTypes.NONE))
+        self.quadruples[-1].push_type(Type(ret_type, StructuredTypes.NONE))
 
 
     # Enter a parse tree produced by PpParser#dbeta0.
@@ -988,7 +1011,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rbinom0.
     def exitRbinom0(self, ctx:PpParser.Rbinom0Context):
-        self.stat_function_call("rbinom", 2)
+        self.stat_function_call("rbinom", 2, BasicTypes.INT)
 
 
     # Enter a parse tree produced by PpParser#exp0.
@@ -1096,7 +1119,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rgeom0.
     def exitRgeom0(self, ctx:PpParser.Rgeom0Context):
-        self.stat_function_call("rgeom", 1)
+        self.stat_function_call("rgeom", 1, BasicTypes.INT)
 
 
     # Enter a parse tree produced by PpParser#norm0.
@@ -1168,7 +1191,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#rpois0.
     def exitRpois0(self, ctx:PpParser.Rpois0Context):
-        self.stat_function_call("rpois", 1)
+        self.stat_function_call("rpois", 1, BasicTypes.INT)
 
 
     # Enter a parse tree produced by PpParser#unif0.

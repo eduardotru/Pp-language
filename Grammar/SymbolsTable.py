@@ -122,6 +122,15 @@ class SymbolsTable:
             return True
         return False
 
+    def add_constant(self, value, type):
+        pass
+
+    def exists_constant(self, value):
+        pass
+
+    def constant_to_dir(self, value):
+        pass
+
     def dir_to_name(self, memory_dir):
         if memory_dir >= self.memory_pointer:
             raise Exception("Memory direction empty.")
