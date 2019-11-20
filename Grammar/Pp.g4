@@ -136,7 +136,7 @@ output0 :
   ;
 
 plot0 :
-  'plot' '(' arithmetic_exp0 ',' arithmetic_exp0 ')' ';'
+  'plot' '(' expression0 ',' expression0 ')' ';'
   ;
 
 readcsv0 :
@@ -276,7 +276,7 @@ value0 :
  ;
 
 value1 :
-  '[' arithmetic_exp0 ']' '[' arithmetic_exp0 ']'
+  '[' expression0 ']' '[' expression0 ']'
   | // empty
   ;
 

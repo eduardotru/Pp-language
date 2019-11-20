@@ -838,7 +838,37 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#value1.
     def exitValue1(self, ctx:PpParser.Value1Context):
-        pass
+        if len(ctx.expression0()) == 0:
+            return
+        index2 = self.quadruples[-1].pop_operand()
+        index2_type = self.quadruples[-1].pop_type()
+        index1 = self.quadruples[-1].pop_operand()
+        index1_type = self.quadruples[-1].pop_type()
+        base_memory = self.quadruples[-1].pop_operand()
+        mat_type = self.quadruples[-1].pop_type()
+        if mat_type.struct_type != StructuredTypes.MATRIX:
+            print(f"Semantic Error: Invalid indexation to non matrix "
+                  f"at {ctx.start.line}:{ctx.start.column}")
+            exit()
+        
+        if (index1_type.struct_type != StructuredTypes.NONE
+            or index1_type.basic_type != BasicTypes.INT):
+            print(f"Semantic Error: First index of matrix must be integer "
+                  f"at {ctx.start.line}:{ctx.start.column}")
+            exit()
+        
+        if (index2_type.struct_type != StructuredTypes.NONE
+            or index2_type.basic_type != BasicTypes.INT):
+            print(f"Semantic Error: Second index of matrix must be integer "
+                  f"at {ctx.start.line}:{ctx.start.column}")
+            exit()
+
+        self.quadruples[-1].add_quadruple("ver", index1, 0, mat_type.rows)
+        self.quadruples[-1].add_quadruple("ver", index2, 0, mat_type.cols)
+        temp_mat_elem = self.quadruples[-1].new_temp_register(Type(mat_type.basic_type, StructuredTypes.NONE))
+        self.quadruples[-1].add_quadruple(base_memory, index1, index2, temp_mat_elem)
+        self.quadruples[-1].push_operand(temp_mat_elem)
+        self.quadruples[-1].push_type(Type(mat_type.basic_type, StructuredTypes.NONE))
 
 
     def generate_matrix_quads(self, ctx):
@@ -851,7 +881,7 @@ class PpListener(ParseTreeListener):
                 print(f"Semantic error: Matrix literal has extranous dimensions "
                       f"at {ctx.start.line}:{ctx.start.column}")
                 exit()
-            for ptr, elem_type in arr:
+            for _, elem_type in arr:
                 try:
                     basic_type = self.semantic_cube.get(basic_type, elem_type, "=")
                     if elem_type.basic_type == BasicTypes.FLOAT:
