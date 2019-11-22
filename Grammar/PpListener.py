@@ -47,7 +47,7 @@ class PpListener(ParseTreeListener):
     def exitR(self, ctx:PpParser.RContext):
         self.quadruples[-1].add_quadruple("exit", None, None, None)
         self.obj.add_global_quadruples(self.quadruples[-1])
-        self.obj.gen_obj_file(self.symbols_table)
+        self.obj.gen_obj_file(self.symbols_table, "obj_file")
 
 
     # Enter a parse tree produced by PpParser#program0.
@@ -285,8 +285,11 @@ class PpListener(ParseTreeListener):
         )
         self.quadruples[-1].add_quadruple("gosub", None, None, ctx.ID().getText())
         if self.symbols_table.get_return_type(self.function_call_stack[-1]).basic_type != BasicTypes.VOID:
-            self.quadruples[-1].push_operand("retVal")
-            self.quadruples[-1].push_type(self.symbols_table.get_return_type(self.function_call_stack[-1]))
+            temp_type = self.symbols_table.get_return_type(self.function_call_stack[-1])
+            temp_ret = self.quadruples[-1].new_temp_register(temp_type)
+            self.quadruples[-1].add_quadruple("=", "retVal", None, temp_ret)
+            self.quadruples[-1].push_operand(temp_ret)
+            self.quadruples[-1].push_type(temp_type)
         self.param_index.pop()
         self.function_call_stack.pop()
 

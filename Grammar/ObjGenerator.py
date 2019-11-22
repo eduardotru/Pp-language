@@ -1,6 +1,5 @@
 from Quadruples import Quadruple
 
-
 class ObjGenerator:
     def __init__(self):
         self.functions = {}
@@ -21,6 +20,7 @@ class ObjGenerator:
             retQuads.append(quad)
             origin.append("program")
         funStarts = {"program": 0}
+
         for key in self.functions:
             funStarts[key] = len(retQuads)
             for quad in self.functions[key].quadruples:
@@ -28,29 +28,24 @@ class ObjGenerator:
                 origin.append(key)
 
         for i in range(len(retQuads)):
-            quad = retQuads[i]
-            if quad.op == "gosub":
-                ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
-                    "\t\t" + str(quad.left) + "\t\t" + \
-                    str(quad.right) + "\t\t" + str(funStarts[quad.res]) + "\n"
-            elif quad.op == "goto" or quad.op == "gotof":
-                ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
-                    "\t\t" + str(quad.left) + "\t\t" + \
-                    str(quad.right) + "\t\t" + \
-                    str(quad.res + funStarts[origin[i]]) + "\n"
-            else:
-                ret += str(self.instruction_ptr) + "\t\t" + str(quad.op) + \
-                    "\t\t" + str(quad.left) + "\t\t" + \
-                    str(quad.right) + "\t\t" + str(quad.res) + "\n"
-            self.instruction_ptr = self.instruction_ptr + 1
+            retQuads[i]
+            if retQuads[i].op == "gosub":
+                retQuads[i].res = funStarts[retQuads[i].res]
+                
+            elif retQuads[i].op == "goto" or retQuads[i].op == "gotof":
+                retQuads[i].res += funStarts[origin[i]]
 
-        return ret
+        return retQuads
 
-    def gen_obj_file(self, symbols_table):
-        ret = "==================QUADRUPLES by Pp==================\n"
-        ret += "#\t\tOp\t\tLeft\t\tRight\t\tRes\n"
-        ret += self.joinQuads(self.program.quadruples, symbols_table)
-        ret += "======================================"
-        f = open("out.txt", "w")
-        f.write(ret)
-        f.close()
+    def gen_obj_file(self, symbols_table, filename):
+        quads = self.joinQuads(self.program.quadruples, symbols_table)
+        with open(filename + ".ppo", 'w') as obj:
+            for quad in quads:
+                if quad.left is None:
+                    quad.left = 0
+                if quad.right is None:
+                    quad.right = 0
+                if quad.res is None:
+                    quad.res = 0
+
+                obj.write(f'{quad.op} {quad.left} {quad.right} {quad.res}\n')
