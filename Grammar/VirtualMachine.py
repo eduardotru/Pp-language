@@ -13,7 +13,9 @@ class VirtualMachine:
 
     def parse_quadruples(self):
         with open(self.filename, 'r') as f:
-            pass
+            for line in f.readlines():
+                self.quadruples.append(line.split())
+
 
     def execute(self):
         for quadruple in self.quadruples:

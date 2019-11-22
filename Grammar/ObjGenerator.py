@@ -1,4 +1,6 @@
 from Quadruples import Quadruple
+from MemoryGenerator import MemoryGenerator, MemoryRepresentation
+from Memory import Memory
 
 class ObjGenerator:
     def __init__(self):
@@ -12,7 +14,7 @@ class ObjGenerator:
     def add_global_quadruples(self, quadruples):
         self.program = quadruples
 
-    def joinQuads(self, programQuads, symbols_table):
+    def joinQuads(self, programQuads):
         ret = ""
         retQuads = []
         origin = []
@@ -37,8 +39,8 @@ class ObjGenerator:
 
         return retQuads
 
-    def gen_obj_file(self, symbols_table, filename):
-        quads = self.joinQuads(self.program.quadruples, symbols_table)
+    def gen_obj_file(self, filename):
+        quads = self.joinQuads(self.program.quadruples)
         with open(filename + ".ppo", 'w') as obj:
             for quad in quads:
                 if quad.left is None:
@@ -49,3 +51,7 @@ class ObjGenerator:
                     quad.res = 0
 
                 obj.write(f'{quad.op} {quad.left} {quad.right} {quad.res}\n')
+
+    def gen_mem_file(self, symbols_table, filename):
+        pass
+

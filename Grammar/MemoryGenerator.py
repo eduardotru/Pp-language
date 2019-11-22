@@ -30,7 +30,7 @@ class MemoryGenerator:
                 "repr": None,
                 "vals": None,
             },
-            "globals": None
+            "program": None
         }
 
     def add_function(self, name, memory_repr, temp_repr):
@@ -39,8 +39,11 @@ class MemoryGenerator:
             "temps": temp_repr.__dict__
         }
 
-    def add_globals(self, memory_repr):
-        self.content["globals"] = memory_repr.__dict__
+    def add_globals(self, memory_repr, temp_repr):
+        self.content["program"] = {
+            "locals": memory_repr.__dict__,
+            "temps": temp_repr.__dict__
+        }
 
     def add_contants(self, memory_repr, memory_vals):
         self.content["constants"]["repr"] = memory_repr.__dict__

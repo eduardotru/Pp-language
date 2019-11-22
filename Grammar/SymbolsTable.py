@@ -72,6 +72,10 @@ class SymbolsTable:
         self.globTempFloat = 31000
         self.globTempBool = 32000
         self.globTempString = 33000
+        self.globTempMatInt = 40000
+        self.globTempMatFloat = 41000
+        self.globTempMatBool = 42000
+        self.globTempMatString = 43000
 
         self.locVarInt = 100000
         self.locVarFloat = 101000
@@ -83,10 +87,14 @@ class SymbolsTable:
         self.locMatString = 113000
 
         # Just for reference, used in quadruples
-        self.globTempInt = 130000
-        self.globTempFloat = 131000
-        self.globTempBool = 132000
-        self.globTempString = 133000
+        self.locTempInt = 130000
+        self.locTempFloat = 131000
+        self.locTempBool = 132000
+        self.locTempString = 133000
+        self.locTempMatInt = 140000
+        self.locTempMatFloat = 141000
+        self.locTempMatBool = 142000
+        self.locTempMatString = 143000
 
         self.constants = Function("constants", BasicTypes.VOID, {})
         self.dir_to_memory_dict = {}

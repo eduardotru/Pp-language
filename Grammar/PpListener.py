@@ -47,7 +47,8 @@ class PpListener(ParseTreeListener):
     def exitR(self, ctx:PpParser.RContext):
         self.quadruples[-1].add_quadruple("exit", None, None, None)
         self.obj.add_global_quadruples(self.quadruples[-1])
-        self.obj.gen_obj_file(self.symbols_table, "obj_file")
+        self.obj.gen_obj_file("obj_file")
+        self.obj.gen_mem_file(self.symbols_table, "mem_file")
 
 
     # Enter a parse tree produced by PpParser#program0.
