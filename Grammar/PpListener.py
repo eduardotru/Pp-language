@@ -130,6 +130,7 @@ class PpListener(ParseTreeListener):
     def exitFunction_decl0(self, ctx:PpParser.Function_decl0Context):
         self.obj.add_function_quadruples(self.current_scope, self.quadruples[-1])
         self.symbols_table.set_function_memory(self.current_scope, self.quadruples[-1].temp_register_ptr)
+        self.quadruples[-1].add_quadruple("end", None, None, None)
         self.quadruples.pop()
         self.current_scope = GLOBAL_SCOPE
         
@@ -271,7 +272,7 @@ class PpListener(ParseTreeListener):
             print(f"Semantic error: Use of undeclared function {ctx.ID().getText()} at {ctx.start.line}:{ctx.start.column}")
             exit()
         self.function_call_stack.append(ctx.ID().getText())
-        self.param_index.append(0);
+        self.param_index.append(0)
         
 
     # Exit a parse tree produced by PpParser#function_call_aux0.
