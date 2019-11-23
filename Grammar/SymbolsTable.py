@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List, Tuple
 
+from MemoryGenerator import MemoryRepresentation
 
 class BasicTypes(Enum):
     BOOL = "bool"
@@ -42,6 +43,52 @@ class Function:
         self.parameters = []
         self.variables = parameters
         self.memory_size = 0
+
+    def get_dirs(self, basic_type, struct_type):
+        return [
+            var.memory_dir
+            for var in self.variables.values()
+            if var.type.basic_type == basic_type and
+                var.type.struct_type == struct_type
+        ]
+
+    def encode_matrix_data(self, basic_type):
+        matrix_dirs = self.get_dirs(basic_type, StructuredTypes.MATRIX)
+        matrices = [var for var in self.variables.values() if var.memory_dir in matrix_dirs]
+        matrices.sort(key=(lambda x: x.memory_dir))
+        return [(matrix.type.rows, matrix.type.cols) for matrix in matrices]
+    
+    def encode(self):
+        return MemoryRepresentation(
+            [   min(self.get_dirs(BasicTypes.INT, StructuredTypes.NONE), default=0),
+                max(self.get_dirs(BasicTypes.INT, StructuredTypes.NONE), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.NONE), default=0),
+                max(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.NONE), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.BOOL, StructuredTypes.NONE), default=0),
+                max(self.get_dirs(BasicTypes.BOOL, StructuredTypes.NONE), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.STRING, StructuredTypes.NONE), default=0),
+                max(self.get_dirs(BasicTypes.STRING, StructuredTypes.NONE), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.INT, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.INT, StructuredTypes.MATRIX), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.MATRIX), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.BOOL, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.BOOL, StructuredTypes.MATRIX), default=-1)
+            ],
+            [   min(self.get_dirs(BasicTypes.STRING, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.STRING, StructuredTypes.MATRIX), default=-1)
+            ],
+            self.encode_matrix_data(BasicTypes.INT),
+            self.encode_matrix_data(BasicTypes.FLOAT),
+            self.encode_matrix_data(BasicTypes.BOOL),
+            self.encode_matrix_data(BasicTypes.STRING),
+        )
 
 
 class Variable:

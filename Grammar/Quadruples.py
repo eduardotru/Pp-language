@@ -1,4 +1,4 @@
-from SymbolsTable import BasicTypes, StructuredTypes
+from SymbolsTable import BasicTypes, StructuredTypes, Variable, Function
 
 class Quadruple:
     def __init__(self, op, left, right, res):
@@ -16,6 +16,8 @@ class Quadruples:
         self.ptipos = []
         self.quadruples = []
         self.temp_register_ptr = 0
+
+        self.vars = Function("temps", None, {})
 
         padding = 0 if not isFunc else 100000
         
@@ -56,6 +58,7 @@ class Quadruples:
             elif register_type.basic_type == BasicTypes.STRING:
                 ret = self.tempString
                 self.tempString += 1
+        self.vars.variables[ret] = Variable("temp", register_type, "temp", ret)
         return ret
 
     def get_quad_count(self):
@@ -135,6 +138,9 @@ class Quadruples:
             raise Exception("There are no elements left.")
         else:
             return self.ptipos[-1]
+
+    def encode_temp_memory(self):
+        return self.vars.encode()
 
     def __str__(self):
         ret = "==============================POPER======================================\n"

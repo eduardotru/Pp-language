@@ -10,7 +10,11 @@ class MemoryRepresentation:
         matIntRange,
         matFloatRange,
         matBoolRange,
-        matStringRange
+        matStringRange,
+        matInts,
+        matFloats,
+        matBools,
+        matStrings
     ):
         self.intRange = intRange
         self.floatRange = floatRange
@@ -20,6 +24,10 @@ class MemoryRepresentation:
         self.matFloatRange = matFloatRange
         self.matBoolRange = matBoolRange
         self.matStringRange = matStringRange
+        self.matInts = matInts
+        self.matFloats = matFloats
+        self.matBools = matBools
+        self.matStrings = matStrings
 
 
 class MemoryGenerator:
@@ -45,16 +53,30 @@ class MemoryGenerator:
             "temps": temp_repr.__dict__
         }
 
-    def add_contants(self, memory_repr, memory_vals):
+    def add_constants(self, memory_repr, memory_vals):
         self.content["constants"]["repr"] = memory_repr.__dict__
-        self.content["constants"]["vals"] = memory_vals.__dict__
+        self.content["constants"]["vals"] = memory_vals
 
     def encode(self, filename):
         with open(filename, 'w') as f:
             json.dump(self.content, f)
 
-    def decode(self, filename):
+    @staticmethod
+    def decode(filename):
         with open(filename, 'r') as f:
-            self.content = json.load(f)
+            content = json.load(f)
+        for func in content["functions"].keys():
+            content["functions"][func]["locals"] = MemoryRepresentation(**content["functions"][func]["locals"])
+            content["functions"][func]["temps"] = MemoryRepresentation(**content["functions"][func]["temps"])
+        
+        content["program"]["locals"] = MemoryRepresentation(**content["program"]["locals"])
+        content["program"]["temps"] = MemoryRepresentation(**content["program"]["temps"])
+
+        content["constants"]["repr"] = MemoryRepresentation(**content["constants"]["repr"])
+
+        return content
+
+        
+
 
     

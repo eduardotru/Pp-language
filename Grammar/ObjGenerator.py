@@ -15,7 +15,6 @@ class ObjGenerator:
         self.program = quadruples
 
     def joinQuads(self, programQuads):
-        ret = ""
         retQuads = []
         origin = []
         for quad in programQuads:
@@ -53,5 +52,20 @@ class ObjGenerator:
                 obj.write(f'{quad.op} {quad.left} {quad.right} {quad.res}\n')
 
     def gen_mem_file(self, symbols_table, filename):
-        pass
+        mem = MemoryGenerator()
+        for func_name, func in symbols_table.functions.items():
+            if func_name == "program":
+                continue
+            quads = self.functions[func_name]
+            mem.add_function(func_name, func.encode(), quads.encode_temp_memory())
+        
+        mem.add_globals(symbols_table.functions["program"].encode(), self.program.encode_temp_memory())
+        mem.add_constants(
+            symbols_table.constants.encode(),
+            [
+                [var.type.basic_type.value, var.name]
+                for var in sorted(symbols_table.constants.variables.values(), key=(lambda v: v.memory_dir))
+            ]
+        )
+        mem.encode(filename + ".json")
 
