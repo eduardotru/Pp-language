@@ -63,7 +63,7 @@ class ObjGenerator:
         mem.add_constants(
             symbols_table.constants.encode(),
             [
-                [var.type.basic_type.value, var.name]
+                [var.memory_dir, var.name]
                 for var in sorted(symbols_table.constants.variables.values(), key=(lambda v: v.memory_dir))
             ]
         )

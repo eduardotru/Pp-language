@@ -1,34 +1,46 @@
 from Memory import Memory
+from MemoryGenerator import MemoryGenerator
 
 class VirtualMachine:
     def __init__(self, filename):
         self.filename = filename
         self.quadruples = []
-        self.globalMemory = None
         self.instructionPointer = [0]
-        self.functionStack = []
+        self.functionLocalStack = []
+        self.functionTempStack = []
         self.retVal = None
         self.paramStack = []
         self.parse_quadruples()
+        self.memory = MemoryGenerator.decode(self.filename + ".json")
+        self.globalMemory = Memory(self.memory["program"]["locals"])
+        self.globalTemps = Memory(self.memory["program"]["temps"])
+        self.constants = Memory(self.memory["constants"]["repr"])
+        for [addr, val] in self.memory["constants"]["vals"]:
+            self.constants.set_value(addr, val)
 
     def parse_quadruples(self):
-        with open(self.filename, 'r') as f:
+        with open(self.filename + ".ppo", 'r') as f:
             for line in f.readlines():
                 self.quadruples.append(line.split())
 
+    def expand_activation_record(self, func):
+        self.functionLocalStack.append(Memory(self.memory["functions"][func]["locals"]))
+        self.functionTempStack.append(Memory(self.memory["functions"][func]["temps"]))
+
 
     def execute(self):
-        for quadruple in self.quadruples:
-            if (self.execute_quadruple(quadruple)):
+        for [op, left, right, res] in self.quadruples:
+            if (self.execute_quadruple(op, left, right, res)):
                 self.instructionPointer[-1] = self.instructionPointer[-1] + 1
 
-    def execute_quadruple(self, quadruple):
-        pass
+    def execute_quadruple(self, op, left, right, res):
+        print(op, left, right, res)
+        return True
 
 """
 Possible instructions:
     Arithmetic:
-        +
+        + 
         -
         /
         %
@@ -47,7 +59,7 @@ Possible instructions:
         not
     I/O:
         read _ _ var
-        write var _ _
+        write _ _ var
         plot matrix matrix _
     Flow control:
         goto _ _ ptr

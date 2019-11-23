@@ -17,5 +17,5 @@ class Memory:
     def get_value(self, address):
         pass
 
-    def set_value(self, address):
+    def set_value(self, address, value):
         pass
