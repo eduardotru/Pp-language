@@ -75,7 +75,10 @@ class VirtualMachine:
         elif op == "^":
             self.daw(self.dar(left) ** self.dar(right), res)
         elif op == "=":
-            self.daw(self.dar(left), res)
+            if left == "pop_param":
+                self.daw(self.paramStack.pop(), res)
+            else:
+                self.daw(self.dar(left), res)
         elif op == ">":
             self.daw(self.dar(left) > self.dar(right), res)
         elif op == "<":
@@ -98,6 +101,23 @@ class VirtualMachine:
             self.daw(input(), res)
         elif op == "write":
             print(self.dar(res))
+        elif op == "goto":
+            self.instructionPointer[-1] = res - 1
+        elif op == "gotof":
+            if self.dar(left) == False:
+                self.instructionPointer[-1] = res - 1
+        elif op == "push_param":
+            self.paramStack.append(self.dar(left))
+        elif op == "return":
+            self.retVal = self.dar(res)
+        elif op == "era":
+            self.expand_activation_record(func)
+        elif op == "gosub":
+            self.instructionPointer.push(int(res))
+        elif op == "end":
+            self.instructionPointer.pop()
+        else:
+            return False
         return True
 
 
