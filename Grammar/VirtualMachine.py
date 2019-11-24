@@ -71,7 +71,7 @@ class VirtualMachine:
         self.daro(mem).set_value(mem, val)
 
     def execute_quadruple(self, op, left, right, res):
-        print(self.instructionPointer[-1], op, left, right, res)
+        # print(self.instructionPointer[-1], op, left, right, res)
         if op == "+":
             self.daw(self.dar(left) + self.dar(right), res)
         elif op == "-":

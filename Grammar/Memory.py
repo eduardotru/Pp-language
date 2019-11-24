@@ -38,7 +38,7 @@ class Memory:
         elif address >= self.memory_repr.floatRange[0] and address <= self.memory_repr.floatRange[1]:
             self.floats[address - self.memory_repr.floatRange[0]] = float(value)
         elif address >= self.memory_repr.boolRange[0] and address <= self.memory_repr.boolRange[1]:
-            self.bools[address - self.memory_repr.boolRange[0]] = value == "true"
+            self.bools[address - self.memory_repr.boolRange[0]] = value if value not in ["true", "false"] else value == "true"
         elif address >= self.memory_repr.stringRange[0] and address <= self.memory_repr.stringRange[1]:
             self.strings[address - self.memory_repr.stringRange[0]] = str(value)
         elif address >= self.memory_repr.matIntRange[0] and address <= self.memory_repr.matIntRange[1]:
