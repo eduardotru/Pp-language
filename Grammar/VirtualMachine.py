@@ -51,8 +51,7 @@ class VirtualMachine:
             else:
                 return self.globalMemory
 
-    # Decode and return. Returns the value in a memory direction
-
+    # Decode and read. Returns the value in a memory direction
     def dar(self, mem):
         self.daro(mem).get_value(mem)
 
@@ -64,37 +63,37 @@ class VirtualMachine:
         print(op, left, right, res)
 
         if op == "+":
-            self.daw(left + right, res)
+            self.daw(self.dar(left) + self.dar(right), res)
         elif op == "-":
-            self.daw(left - right, res)
+            self.daw(self.dar(left) - self.dar(right), res)
         elif op == "*":
-            self.daw(left * right, res)
+            self.daw(self.dar(left) * self.dar(right), res)
         elif op == "/":
-            self.daw(left / right, res)
+            self.daw(self.dar(left) / self.dar(right), res)
         elif op == "%":
-            self.daw(left % right, res)
+            self.daw(self.dar(left) % self.dar(right), res)
         elif op == "^":
-            self.daw(left ** right, res)
+            self.daw(self.dar(left) ** self.dar(right), res)
         elif op == "=":
-            self.daw(left, res)
+            self.daw(self.dar(left), res)
         elif op == ">":
-            self.daw(left > right, res)
+            self.daw(self.dar(left) > self.dar(right), res)
         elif op == "<":
-            self.daw(left < right, res)
+            self.daw(self.dar(left) < self.dar(right), res)
         elif op == ">=":
-            self.daw(left >= right, res)
+            self.daw(self.dar(left) >= self.dar(right), res)
         elif op == "<=":
-            self.daw(left <= right, res)
+            self.daw(self.dar(left) <= self.dar(right), res)
         elif op == "==":
-            self.daw(left == right, res)
+            self.daw(self.dar(left) == self.dar(right), res)
         elif op == "!=":
-            self.daw(left != right, res)
+            self.daw(self.dar(left) != self.dar(right), res)
         elif op == "and":
-            self.daw(left and right, res)
+            self.daw(self.dar(left) and self.dar(right), res)
         elif op == "or":
-            self.daw(left or right, res)
+            self.daw(self.dar(left) or self.dar(right), res)
         elif op == "not":
-            self.daw(not left, res)
+            self.daw(not self.dar(left), res)
         elif op == "read":
             self.daw(input(), res)
         elif op == "write":
