@@ -1,6 +1,7 @@
 from Memory import Memory
 from MemoryGenerator import MemoryGenerator
 
+
 class VirtualMachine:
     def __init__(self, filename):
         self.filename = filename
@@ -24,24 +25,71 @@ class VirtualMachine:
                 self.quadruples.append(line.split())
 
     def expand_activation_record(self, func):
-        self.functionLocalStack.append(Memory(self.memory["functions"][func]["locals"]))
-        self.functionTempStack.append(Memory(self.memory["functions"][func]["temps"]))
-
+        self.functionLocalStack.append(
+            Memory(self.memory["functions"][func]["locals"]))
+        self.functionTempStack.append(
+            Memory(self.memory["functions"][func]["temps"]))
 
     def execute(self):
         for [op, left, right, res] in self.quadruples:
             if (self.execute_quadruple(op, left, right, res)):
                 self.instructionPointer[-1] = self.instructionPointer[-1] + 1
 
+    # Decode and return the memory object for a memory location
+
+    def daro(self, mem):
+        if mem > 100000:
+            if mem > 120000:
+                return self.functionTempStack[-1]
+            else:
+                return self.functionLocalStack[-1]
+        else:
+            if mem > 30000:
+                return self.globalTemps
+            elif mem > 20000:
+                return self.constants
+            else:
+                return self.globalMemory
+
+    # Decode and return. Returns the value in a memory direction
+
+    def dar(self, mem):
+        self.daro(mem).get_value(mem)
+
+    # Decode and write. Writes a value in a memory direction
+    def daw(self, val, mem):
+        self.daro(mem).set_value(mem, val)
+
     def execute_quadruple(self, op, left, right, res):
         print(op, left, right, res)
+
+        if op == "+":
+            self.daw(left + right, res)
+        elif op == "-":
+            self.daw(left - right, res)
+        elif op == "*":
+            self.daw(left * right, res)
+        elif op == "/":
+            self.daw(left / right, res)
+        elif op == "%":
+            self.daw(left % right, res)
+        elif op == "^":
+            self.daw(left ** right, res)
+        elif op == "=":
+            self.daw(left, res)
+        elif op == "read":
+            self.daw(input(), res)
+        elif op == "write":
+            print(self.dar(res))
         return True
+
 
 """
 Possible instructions:
     Arithmetic:
         + 
         -
+        *
         /
         %
         ^
