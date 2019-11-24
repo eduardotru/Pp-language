@@ -64,7 +64,7 @@ class VirtualMachine:
         print(op, left, right, res)
 
         if op == "+":
-            self.daw(left + right, res)
+            self.daw(self.dar(left) + self.dar(right), res)
         elif op == "-":
             self.daw(left - right, res)
         elif op == "*":

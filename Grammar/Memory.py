@@ -15,7 +15,37 @@ class Memory:
         self.matStrings = [ [ ["" for _ in range(cols)] for _ in range(rows) ] for [rows, cols] in memory_repr.matStrings]
 
     def get_value(self, address):
-        pass
+        if address >= self.memory_repr.intRange[0] and address <= self.memory_repr.intRange[1]:
+            return self.ints[address - self.memory_repr.intRange[0]]
+        elif address >= self.memory_repr.floatRange[0] and address <= self.memory_repr.floatRange[1]:
+            return self.floats[address - self.memory_repr.floatRange[0]]
+        elif address >= self.memory_repr.boolRange[0] and address <= self.memory_repr.boolRange[1]:
+            return self.bools[address - self.memory_repr.boolRange[0]]
+        elif address >= self.memory_repr.stringRange[0] and address <= self.memory_repr.stringRange[1]:
+            return self.strings[address - self.memory_repr.stringRange[0]]
+        elif address >= self.memory_repr.matIntRange[0] and address <= self.memory_repr.matIntRange[1]:
+            return self.matInts[address - self.memory_repr.matIntRange[0]]
+        elif address >= self.memory_repr.matFloatRange[0] and address <= self.memory_repr.matFloatRange[1]:
+            return self.matFloats[address - self.memory_repr.matFloatRange[0]]
+        elif address >= self.memory_repr.matBoolRange[0] and address <= self.memory_repr.matBoolRange[1]:
+            return self.matBools[address - self.memory_repr.matBoolRange[0]]
+        elif address >= self.memory_repr.matStringRange[0] and address <= self.memory_repr.matStringRange[1]:
+            return self.matStrings[address - self.memory_repr.matStringRange[0]]
 
     def set_value(self, address, value):
-        pass
+        if address >= self.memory_repr.intRange[0] and address <= self.memory_repr.intRange[1]:
+            self.ints[address - self.memory_repr.intRange[0]] = int(value)
+        elif address >= self.memory_repr.floatRange[0] and address <= self.memory_repr.floatRange[1]:
+            self.floats[address - self.memory_repr.floatRange[0]] = float(value)
+        elif address >= self.memory_repr.boolRange[0] and address <= self.memory_repr.boolRange[1]:
+            self.bools[address - self.memory_repr.boolRange[0]] = value == "true"
+        elif address >= self.memory_repr.stringRange[0] and address <= self.memory_repr.stringRange[1]:
+            self.strings[address - self.memory_repr.stringRange[0]] = str(value)
+        elif address >= self.memory_repr.matIntRange[0] and address <= self.memory_repr.matIntRange[1]:
+            self.matInts[address - self.memory_repr.matIntRange[0]] = np.copy(value)
+        elif address >= self.memory_repr.matFloatRange[0] and address <= self.memory_repr.matFloatRange[1]:
+            self.matFloats[address - self.memory_repr.matFloatRange[0]] = np.copy(value)
+        elif address >= self.memory_repr.matBoolRange[0] and address <= self.memory_repr.matBoolRange[1]:
+            self.matBools[address - self.memory_repr.matBoolRange[0]] = np.copy(value)
+        elif address >= self.memory_repr.matStringRange[0] and address <= self.memory_repr.matStringRange[1]:
+            self.matStrings[address - self.memory_repr.matStringRange[0]] = np.copy(value)
