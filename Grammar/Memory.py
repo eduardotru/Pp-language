@@ -6,9 +6,9 @@ class Memory:
     def __init__(self, memory_repr: MemoryRepresentation):
         self.memory_repr = memory_repr
         self.ints = [0 for _ in range(memory_repr.intRange[1] - memory_repr.intRange[0] + 1)]
-        self.floats = [0.0 for _ in range(memory_repr.intRange[1] - memory_repr.intRange[0] + 1)]
-        self.bools = [False for _ in range(memory_repr.intRange[1] - memory_repr.intRange[0] + 1)]
-        self.strings = ["" for _ in range(memory_repr.intRange[1] - memory_repr.intRange[0] + 1)]
+        self.floats = [0.0 for _ in range(memory_repr.floatRange[1] - memory_repr.floatRange[0] + 1)]
+        self.bools = [False for _ in range(memory_repr.boolRange[1] - memory_repr.boolRange[0] + 1)]
+        self.strings = ["" for _ in range(memory_repr.stringRange[1] - memory_repr.stringRange[0] + 1)]
         self.matInts = [np.zeros((rows, cols), dtype=np.int64) for [rows, cols] in memory_repr.matInts]
         self.matFloats = [np.zeros((rows, cols), dtype=np.float64) for [rows, cols] in memory_repr.matFloats]
         self.matBools = [np.zeros((rows, cols), dtype=np.bool_) for [rows, cols] in memory_repr.matBools]

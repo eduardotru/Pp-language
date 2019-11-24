@@ -1,23 +1,35 @@
-let int fib;
+let int fact;
 
-func int fibonacci (int n) {
-  let int f1, f2, i, aux;
-  f1 = 0;
-  f2 = 1;
-  i = 0;
-  while (i < n) {
-    aux = f2;
-    f2 = f1 + f2;
-    f1 = aux;
-    i = i + 1;
+func int factorial (int n) {
+  let int i, res;
+  i = 1;
+  res = 1;
+  while (i <= n) {
+    res = res*i;
+    i = i + 1; 
   }
-  return f1;
+  return res;
 }
 
-write("Which Fibonacci number do you want?");
-read(fib);
-if (fib < 0) {
+write("Which number factorial do you want?");
+read(fact);
+if (fact < 0) {
   write("Invalid number");
 } else {
-  write(fibonacci(fib));
+  write(factorial(fact));
 }
+
+write("Recursive Factorial");
+
+func int rec_factorial (int n) {
+  let int res;
+  if (n == 0) {
+    write(1);
+    return 1;
+  }
+  res = rec_factorial(n - 1)*n;
+  write(res);
+  return res;
+}
+
+rec_factorial(fact);
