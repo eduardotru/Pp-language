@@ -116,6 +116,8 @@ class VirtualMachine:
             self.instructionPointer.push(int(res))
         elif op == "end":
             self.instructionPointer.pop()
+            self.functionLocalStack.pop()
+            self.functionTempStack.pop()
         else:
             return False
         return True
