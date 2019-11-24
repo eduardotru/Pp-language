@@ -13,7 +13,7 @@ GLOBAL_SCOPE = "program"
 # This class defines a complete listener for a parse tree produced by PpParser.
 class PpListener(ParseTreeListener):
 
-    def __init__(self, symbols_table, semantic_cube, quadruples, obj):
+    def __init__(self, symbols_table, semantic_cube, quadruples, obj, filename):
         self.symbols_table = symbols_table
         self.semantic_cube = semantic_cube
         self.quadruples = [quadruples]
@@ -27,6 +27,7 @@ class PpListener(ParseTreeListener):
         self.param_index = []
         self.function_call_stack = []
         self.matrix_literal = []
+        self.filename = filename
 
     def get_type(self, ctx):
         basic_type = BasicTypes(ctx.basic_type0().getText())
@@ -47,8 +48,8 @@ class PpListener(ParseTreeListener):
     def exitR(self, ctx:PpParser.RContext):
         self.quadruples[-1].add_quadruple("exit", None, None, None)
         self.obj.add_global_quadruples(self.quadruples[-1])
-        self.obj.gen_obj_file("obj_file")
-        self.obj.gen_mem_file(self.symbols_table, "mem_file")
+        self.obj.gen_obj_file(self.filename)
+        self.obj.gen_mem_file(self.symbols_table, self.filename)
 
 
     # Enter a parse tree produced by PpParser#program0.
