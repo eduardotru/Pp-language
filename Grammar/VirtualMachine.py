@@ -31,37 +31,44 @@ class VirtualMachine:
             Memory(self.memory["functions"][func]["temps"]))
 
     def execute(self):
-        for [op, left, right, res] in self.quadruples:
+        while True:
+            [op, left, right, res] = self.quadruples[self.instructionPointer[-1]]
             if (self.execute_quadruple(op, left, right, res)):
                 self.instructionPointer[-1] = self.instructionPointer[-1] + 1
 
     # Decode and return the memory object for a memory location
 
     def daro(self, mem):
-        if mem > 100000:
-            if mem > 120000:
+        if mem >= 100000:
+            if mem >= 120000:
                 return self.functionTempStack[-1]
             else:
                 return self.functionLocalStack[-1]
         else:
-            if mem > 30000:
+            if mem >= 30000:
                 return self.globalTemps
-            elif mem > 20000:
+            elif mem >= 20000:
                 return self.constants
             else:
                 return self.globalMemory
 
     # Decode and read. Returns the value in a memory direction
     def dar(self, mem):
-        self.daro(mem).get_value(mem)
+        if mem == "pop_param":
+            return self.paramStack.pop()
+        elif mem == "retVal":
+            return self.retVal
+        else:
+            mem = int(mem)
+            return self.daro(mem).get_value(mem)
 
     # Decode and write. Writes a value in a memory direction
     def daw(self, val, mem):
+        mem = int(mem)
         self.daro(mem).set_value(mem, val)
 
     def execute_quadruple(self, op, left, right, res):
-        print(op, left, right, res)
-
+        print(self.instructionPointer[-1], op, left, right, res)
         if op == "+":
             self.daw(self.dar(left) + self.dar(right), res)
         elif op == "-":
@@ -98,6 +105,29 @@ class VirtualMachine:
             self.daw(input(), res)
         elif op == "write":
             print(self.dar(res))
+        elif op == "goto":
+            self.instructionPointer[-1] = int(res)
+            return False
+        elif op == "gotof":
+            if not self.dar(left):
+                self.instructionPointer[-1] = int(res)
+                return False
+        elif op == "push_param":
+            self.paramStack.append(self.dar(left))
+        elif op == "era":
+            self.expand_activation_record(left)
+        elif op == "gosub":
+            self.instructionPointer.append(int(res))
+            return False
+        elif op == "return":
+            self.retVal = self.dar(res)
+        elif op == "end":
+            self.instructionPointer.pop()
+            self.functionLocalStack.pop()
+            self.functionTempStack.pop()
+        elif op == "exit":
+            exit()
+
         return True
 
 
