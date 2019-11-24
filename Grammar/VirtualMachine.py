@@ -34,6 +34,9 @@ class VirtualMachine:
         for [op, left, right, res] in self.quadruples:
             if (self.execute_quadruple(op, left, right, res)):
                 self.instructionPointer[-1] = self.instructionPointer[-1] + 1
+            else:
+                raise Exception("Execution error on quad #" +
+                                str(self.instructionPointer[-1]))
 
     # Decode and return the memory object for a memory location
 
