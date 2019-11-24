@@ -35,6 +35,9 @@ class VirtualMachine:
             [op, left, right, res] = self.quadruples[self.instructionPointer[-1]]
             if (self.execute_quadruple(op, left, right, res)):
                 self.instructionPointer[-1] = self.instructionPointer[-1] + 1
+            else:
+                raise Exception("Execution error on quad #" +
+                                str(self.instructionPointer[-1]))
 
     # Decode and return the memory object for a memory location
 
@@ -82,7 +85,10 @@ class VirtualMachine:
         elif op == "^":
             self.daw(self.dar(left) ** self.dar(right), res)
         elif op == "=":
-            self.daw(self.dar(left), res)
+            if left == "pop_param":
+                self.daw(self.paramStack.pop(), res)
+            else:
+                self.daw(self.dar(left), res)
         elif op == ">":
             self.daw(self.dar(left) > self.dar(right), res)
         elif op == "<":
@@ -106,19 +112,16 @@ class VirtualMachine:
         elif op == "write":
             print(self.dar(res))
         elif op == "goto":
-            self.instructionPointer[-1] = int(res)
-            return False
+            self.instructionPointer[-1] = int(res) - 1
         elif op == "gotof":
             if not self.dar(left):
-                self.instructionPointer[-1] = int(res)
-                return False
+                self.instructionPointer[-1] = int(res) - 1
         elif op == "push_param":
             self.paramStack.append(self.dar(left))
         elif op == "era":
             self.expand_activation_record(left)
         elif op == "gosub":
-            self.instructionPointer.append(int(res))
-            return False
+            self.instructionPointer.append(int(res) - 1)
         elif op == "return":
             self.retVal = self.dar(res)
         elif op == "end":
@@ -128,6 +131,8 @@ class VirtualMachine:
         elif op == "exit":
             exit()
 
+        else:
+            return False
         return True
 
 
