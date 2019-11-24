@@ -124,6 +124,9 @@ class VirtualMachine:
             self.instructionPointer.append(int(res) - 1)
         elif op == "return":
             self.retVal = self.dar(res)
+            self.instructionPointer.pop()
+            self.functionLocalStack.pop()
+            self.functionTempStack.pop()
         elif op == "end":
             self.instructionPointer.pop()
             self.functionLocalStack.pop()

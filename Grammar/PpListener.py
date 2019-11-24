@@ -270,6 +270,7 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#function_call_aux0.
     def enterFunction_call_aux0(self, ctx:PpParser.Function_call_aux0Context):
+        self.quadruples[-1].push_operator('(')
         if not self.symbols_table.exists_function(ctx.ID().getText(), []):
             print(f"Semantic error: Use of undeclared function {ctx.ID().getText()} at {ctx.start.line}:{ctx.start.column}")
             exit()
@@ -294,6 +295,7 @@ class PpListener(ParseTreeListener):
             self.quadruples[-1].push_type(temp_type)
         self.param_index.pop()
         self.function_call_stack.pop()
+        self.quadruples[-1].pop_operator()
 
 
     # Enter a parse tree produced by PpParser#function_call_aux1.
