@@ -77,6 +77,24 @@ class VirtualMachine:
             self.daw(left ** right, res)
         elif op == "=":
             self.daw(left, res)
+        elif op == ">":
+            self.daw(left > right, res)
+        elif op == "<":
+            self.daw(left < right, res)
+        elif op == ">=":
+            self.daw(left >= right, res)
+        elif op == "<=":
+            self.daw(left <= right, res)
+        elif op == "==":
+            self.daw(left == right, res)
+        elif op == "!=":
+            self.daw(left != right, res)
+        elif op == "and":
+            self.daw(left and right, res)
+        elif op == "or":
+            self.daw(left or right, res)
+        elif op == "not":
+            self.daw(not left, res)
         elif op == "read":
             self.daw(input(), res)
         elif op == "write":
