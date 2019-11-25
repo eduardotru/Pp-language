@@ -424,8 +424,48 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#plot0.
     def exitPlot0(self, ctx:PpParser.Plot0Context):
+        fmt = self.quadruples[-1].pop_operand()
+        fmt_type = self.quadruples[-1].pop_type()
+        if fmt_type.basic_type != BasicTypes.STRING or fmt_type.struct_type != StructuredTypes.NONE:
+            print("Semantic Error: Incompatible types in plot third argument. Expecting string at "
+                 f"{ctx.start.line}:{ctx.start.column}")
+            exit()
+        right = self.quadruples[-1].pop_operand()
+        right_type = self.quadruples[-1].pop_type()
+        if right_type.struct_type != StructuredTypes.MATRIX:
+            print("Semantic Error: Incompatible types in plot second argument. Expecting matrix at "
+                 f"{ctx.start.line}:{ctx.start.column}")
+            exit()
+        left = self.quadruples[-1].pop_operand()
+        left_type = self.quadruples[-1].pop_type()
+        if left_type.struct_type != StructuredTypes.MATRIX:
+            print("Semantic Error: Incompatible types in plot first argument. Expecting matrix at "
+                 f"{ctx.start.line}:{ctx.start.column}")
+            exit()
+        self.quadruples[-1].add_quadruple("plot", left, right, fmt)
+
+        # Enter a parse tree produced by PpParser#hist0.
+    def enterHist0(self, ctx:PpParser.Hist0Context):
         pass
 
+    # Exit a parse tree produced by PpParser#hist0.
+    def exitHist0(self, ctx:PpParser.Hist0Context):
+        left = self.quadruples[-1].pop_operand()
+        left_type = self.quadruples[-1].pop_type()
+        if left_type.struct_type != StructuredTypes.MATRIX:
+            print("Semantic Error: Incompatible types in hist argument. Expecting matrix at "
+                 f"{ctx.start.line}:{ctx.start.column}")
+            exit()
+        self.quadruples[-1].add_quadruple("hist", left, None, None)
+
+
+    # Enter a parse tree produced by PpParser#showplot0.
+    def enterShowplot0(self, ctx:PpParser.Showplot0Context):
+        pass
+
+    # Exit a parse tree produced by PpParser#showplot0.
+    def exitShowplot0(self, ctx:PpParser.Showplot0Context):
+        self.quadruples[-1].add_quadruple("showplot", None, None, None)
 
     # Enter a parse tree produced by PpParser#readcsv0.
     def enterReadcsv0(self, ctx:PpParser.Readcsv0Context):
@@ -460,6 +500,7 @@ class PpListener(ParseTreeListener):
     def enterExpression0(self, ctx:PpParser.Expression0Context):
         if ctx.STRING_LITERAL() is not None:
             string_lit = ctx.STRING_LITERAL().getText()
+            string_lit = string_lit[1:len(string_lit)-1]
             string_type = Type(BasicTypes.STRING, StructuredTypes.NONE)
 
             if not self.symbols_table.exists_constant(string_lit):
@@ -1023,13 +1064,32 @@ class PpListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by PpParser#variance.
-    def enterVariance(self, ctx:PpParser.VarianceContext):
+    # Enter a parse tree produced by PpParser#variance0.
+    def enterVariance0(self, ctx:PpParser.Variance0Context):
         pass
 
-    # Exit a parse tree produced by PpParser#variance.
-    def exitVariance(self, ctx:PpParser.VarianceContext):
+    # Exit a parse tree produced by PpParser#variance0.
+    def exitVariance0(self, ctx:PpParser.Variance0Context):
         pass
+
+
+    # Enter a parse tree produced by PpParser#transpose0.
+    def enterTranspose0(self, ctx:PpParser.Transpose0Context):
+        self.quadruples[-1].push_operator('(')
+
+    # Exit a parse tree produced by PpParser#transpose0.
+    def exitTranspose0(self, ctx:PpParser.Transpose0Context):
+        val = self.quadruples[-1].pop_operand()
+        val_type = self.quadruples[-1].pop_type()
+        if val_type.struct_type != StructuredTypes.MATRIX:
+            print(f"Semantic Error: Cannot transpose non matrix type at {ctx.start.line}:{ctx.start.column}")
+            exit()
+        temp_type = Type(val_type.basic_type, val_type.struct_type, val_type.cols, val_type.rows)
+        temp = self.quadruples[-1].new_temp_register(temp_type)
+        self.quadruples[-1].add_quadruple("transpose", val, None, temp)
+        self.quadruples[-1].push_operand(temp)
+        self.quadruples[-1].push_type(temp_type)
+        self.quadruples[-1].pop_operator()
 
 
     # Enter a parse tree produced by PpParser#beta0.

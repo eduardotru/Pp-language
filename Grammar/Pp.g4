@@ -124,6 +124,8 @@ io_statement0 :
   input0
   | output0
   | plot0
+  | hist0
+  | showplot0
   | readcsv0
   ;
 
@@ -136,7 +138,15 @@ output0 :
   ;
 
 plot0 :
-  'plot' '(' expression0 ',' expression0 ')' ';'
+  'plot' '(' expression0 ',' expression0 ',' expression0 ')' ';'
+  ;
+
+hist0 :
+  'hist' '(' expression0 ')' ';'
+  ;
+
+showplot0 :
+  'showplot' '(' ')' ';'
   ;
 
 readcsv0 :
@@ -309,7 +319,8 @@ stat_functions0 :
   | median0
   | mode0
   | stdev0
-  | variance
+  | variance0
+  | transpose0
   | beta0
   | binom0
   | exp0
@@ -336,8 +347,12 @@ stdev0 :
   'stdev' '(' expression0  ')'
   ;
 
-variance :
+variance0 :
   'variance' '(' expression0  ')'
+  ;
+
+transpose0 :
+  'transpose' '(' expression0  ')'
   ;
 
 beta0 :

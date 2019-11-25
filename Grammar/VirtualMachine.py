@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Memory import Memory
 from MemoryGenerator import MemoryGenerator
@@ -96,7 +97,10 @@ class VirtualMachine:
         elif op == "%":
             self.daw(self.dar(left) % self.dar(right), res)
         elif op == "^":
-            self.daw(self.dar(left) ** self.dar(right), res)
+            if isinstance(self.dar(left), np.ndarray):
+                self.daw(np.linalg.matrix_power(self.dar(left), self.dar(right)), res)
+            else:
+                self.daw(self.dar(left) ** self.dar(right), res)
         elif op == "=":
             if left == "pop_param":
                 self.daw(self.paramStack.pop(), res)
@@ -152,6 +156,16 @@ class VirtualMachine:
             if self.dar(left) < int(right) or self.dar(left) >= int(res):
                 print("Segmentation Fault")
                 exit()
+        elif op == "plot":
+            x = self.dar(left)
+            y = self.dar(right)
+            fmt = self.dar(res)
+            plt.plot(x.flatten(), y.flatten(), fmt)
+        elif op == "showplot":
+            plt.show()
+        elif op == "transpose":
+            mat = self.dar(left)
+            self.daw(np.transpose(mat), res)
         elif op.isdigit():
             mat = self.dar(op)
             index1 = self.dar(left)
@@ -189,7 +203,7 @@ Possible instructions:
     I/O:
         read _ _ var
         write _ _ var
-        plot matrix matrix _
+        plot matrix matrix fmt_string
     Flow control:
         goto _ _ ptr
         gotof bool _ ptr
