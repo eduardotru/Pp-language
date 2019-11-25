@@ -288,6 +288,9 @@ class SymbolsTable:
     def get_function_param_type(self, name, index):
         return self.functions[name].parameters[index].type
 
+    def get_function_num_params(self, name):
+        return len(self.functions[name].parameters)
+
     def set_function_memory(self, name, temp_memory):
         self.functions[name].memory_size = temp_memory + \
             len(self.functions[name].variables)

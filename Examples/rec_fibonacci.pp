@@ -1,17 +1,12 @@
 let int fib;
 
 func int fibonacci (int n) {
-  let int f1, f2, i, aux;
-  f1 = 0;
-  f2 = 1;
-  i = 0;
-  while (i < n) {
-    aux = f2;
-    f2 = f1 + f2;
-    f1 = aux;
-    i = i + 1;
+  if (n == 0) {
+    return 0;
+  } elseif (n == 1) {
+    return 1;
   }
-  return f1;
+  return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
 write("Which Fibonacci number do you want?");

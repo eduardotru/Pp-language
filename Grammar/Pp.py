@@ -1,6 +1,8 @@
 #! /usr/bin/python3
 
 import sys
+from pathlib import Path
+
 from antlr4 import *
 from PpLexer import PpLexer
 from PpParser import PpParser
@@ -16,6 +18,6 @@ stream = CommonTokenStream(lexer)
 parser = PpParser(stream)
 tree = parser.r()
 listener = PpListener(SymbolsTable(), SemanticCube(),
-                      Quadruples(isFunc=False), ObjGenerator())
+                      Quadruples(isFunc=False), ObjGenerator(), Path(sys.argv[1]).stem)
 walker = ParseTreeWalker()
 walker.walk(listener, tree)
