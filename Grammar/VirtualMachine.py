@@ -18,6 +18,7 @@ class VirtualMachine:
         self.constants = Memory(self.memory["constants"]["repr"])
         for [addr, val] in self.memory["constants"]["vals"]:
             self.constants.set_value(addr, val)
+        self.matrices_calls = [{}]
 
     def parse_quadruples(self):
         with open(self.filename + ".ppo", 'r') as f:
@@ -29,6 +30,7 @@ class VirtualMachine:
             Memory(self.memory["functions"][func]["locals"]))
         self.functionTempStack.append(
             Memory(self.memory["functions"][func]["temps"]))
+        self.matrices_calls.append({})
 
     def execute(self):
         while True:
@@ -63,12 +65,21 @@ class VirtualMachine:
             return self.retVal
         else:
             mem = int(mem)
+            if mem in self.matrices_calls[-1]:
+                mat, i, j = self.matrices_calls[-1][mem]
+                self.matrices_calls[-1].pop(mem)
+                return mat[i][j]
             return self.daro(mem).get_value(mem)
 
     # Decode and write. Writes a value in a memory direction
     def daw(self, val, mem):
         mem = int(mem)
-        self.daro(mem).set_value(mem, val)
+        if mem in self.matrices_calls[-1]:
+            mat, i, j = self.matrices_calls[-1][mem]
+            mat[i][j] = val
+            self.matrices_calls[-1].pop(mem)
+        else:
+            self.daro(mem).set_value(mem, val)
 
     def execute_quadruple(self, op, left, right, res):
         # print(self.instructionPointer[-1], op, left, right, res)
@@ -127,12 +138,25 @@ class VirtualMachine:
             self.instructionPointer.pop()
             self.functionLocalStack.pop()
             self.functionTempStack.pop()
+            self.matrices_calls.pop()
         elif op == "end":
             self.instructionPointer.pop()
             self.functionLocalStack.pop()
             self.functionTempStack.pop()
+            self.matrices_calls.pop()
         elif op == "exit":
             exit()
+        elif op == "ver":
+            if self.dar(left) < int(right) or self.dar(left) >= int(res):
+                print("Segmentation Fault")
+                exit()
+        elif op.isdigit():
+            mat = self.dar(op)
+            index1 = self.dar(left)
+            index2 = self.dar(right)
+            self.daw(mat[index1][index2], res)
+            res = int(res)
+            self.matrices_calls[-1][res] = (mat, index1, index2)
 
         else:
             return False
