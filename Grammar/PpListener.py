@@ -535,7 +535,21 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#bool_exp0.
     def exitBool_exp0(self, ctx:PpParser.Bool_exp0Context):
-        pass
+        while self.quadruples[-1].has_operator() and self.quadruples[-1].top_operator() == 'not':
+            right = None
+            t_right =Type(BasicTypes.VOID, StructuredTypes.NONE)
+            left = self.quadruples[-1].pop_operand()
+            t_left = self.quadruples[-1].pop_type()
+            operator = self.quadruples[-1].pop_operator()
+            try:
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
+                self.quadruples[-1].add_quadruple(operator, left, right, temp_register)
+                self.quadruples[-1].push_operand(temp_register)
+                self.quadruples[-1].push_type(t_result)
+            except Exception:
+                print(f'Semantic error: Incompatible types on operation {operator}{t_left} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
     def boolOp(self, ctx):
         if self.quadruples[-1].has_operator() and self.quadruples[-1].top_operator() in ['and', 'or']:
@@ -614,7 +628,7 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#bool_not0.
     def enterBool_not0(self, ctx:PpParser.Bool_not0Context):
-        pass
+        self.quadruples[-1].push_operator("not")
 
     # Exit a parse tree produced by PpParser#bool_not0.
     def exitBool_not0(self, ctx:PpParser.Bool_not0Context):
