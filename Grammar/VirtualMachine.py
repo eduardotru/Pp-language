@@ -1,4 +1,6 @@
 import numpy as np
+from scipy import stats
+
 import matplotlib.pyplot as plt
 
 from Memory import Memory
@@ -166,6 +168,21 @@ class VirtualMachine:
         elif op == "transpose":
             mat = self.dar(left)
             self.daw(np.transpose(mat), res)
+        elif op == "mean":
+            mat = self.dar(left)
+            self.daw(np.mean(mat), res)
+        elif op == "median":
+            mat = self.dar(left)
+            self.daw(np.median(mat), res)
+        elif op == "mode":
+            mat = self.dar(left)
+            self.daw(stats.mode(mat, axis=None)[0][0], res)
+        elif op == "stdev":
+            mat = self.dar(left)
+            self.daw(np.std(mat), res)
+        elif op == "variance":
+            mat = self.dar(left)
+            self.daw(np.var(mat), res)
         elif op.isdigit():
             mat = self.dar(op)
             index1 = self.dar(left)

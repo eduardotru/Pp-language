@@ -168,7 +168,7 @@ class PpListener(ParseTreeListener):
             print(f"Semantic error: Redefinition of function {self.func_name}"
                 f"at {ctx.start.line}:{ctx.start.column}")
             exit()
-        for param in self.func_parameters[::-1]:
+        for param in self.func_parameters:
             memory_dir = self.symbols_table.name_to_dir(param.name, self.current_scope)
             self.quadruples[-1].add_quadruple("=", "pop_param", None, memory_dir)
 
@@ -275,7 +275,7 @@ class PpListener(ParseTreeListener):
             print(f"Semantic error: Use of undeclared function {ctx.ID().getText()} at {ctx.start.line}:{ctx.start.column}")
             exit()
         self.function_call_stack.append(ctx.ID().getText())
-        self.param_index.append(0)
+        self.param_index.append(self.symbols_table.get_function_num_params(ctx.ID().getText()) - 1)
         
 
     # Exit a parse tree produced by PpParser#function_call_aux0.
@@ -305,13 +305,16 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#function_call_aux1.
     def exitFunction_call_aux1(self, ctx:PpParser.Function_call_aux1Context):
         if ctx.expression0() is not None:
+            if self.param_index[-1] < 0:
+                print(f"Semantic error: Incorrect number of parameters given to {self.function_call_stack[-1]}"
+                      f" at {ctx.start.line}:{ctx.start.column}")
+
             val = self.quadruples[-1].pop_operand()
             val_type = self.quadruples[-1].pop_type()
             param_type = self.symbols_table.get_function_param_type(
                 self.function_call_stack[-1],
                 self.param_index[-1]
                 )
-            self.param_index[-1] = self.param_index[-1] + 1
             try:
                 self.semantic_cube.get(param_type, val_type, "=")
                 self.quadruples[-1].add_quadruple("push_param", val, None, None)
@@ -319,6 +322,7 @@ class PpListener(ParseTreeListener):
                 print(f'Semantic error: Incompatible parameter type. Expected '
                       f'{param_type}, found {val_type} at {ctx.start.line}:{ctx.start.column}')
                 exit()
+            self.param_index[-1] = self.param_index[-1] - 1
 
 
     # Enter a parse tree produced by PpParser#function_call_aux2.
@@ -328,13 +332,16 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#function_call_aux2.
     def exitFunction_call_aux2(self, ctx:PpParser.Function_call_aux2Context):
         if ctx.expression0() is not None:
+            if self.param_index[-1] < 0:
+                print(f"Semantic error: Incorrect number of parameters given to {self.function_call_stack[-1]}"
+                      f" at {ctx.start.line}:{ctx.start.column}")
+
             val = self.quadruples[-1].pop_operand()
             val_type = self.quadruples[-1].pop_type()
             param_type = self.symbols_table.get_function_param_type(
                 self.function_call_stack[-1],
                 self.param_index[-1]
                 )
-            self.param_index[-1] = self.param_index[-1] + 1
             try:
                 self.semantic_cube.get(param_type, val_type, "=")
                 self.quadruples[-1].add_quadruple("push_param", val, None, None)
@@ -342,6 +349,7 @@ class PpListener(ParseTreeListener):
                 print(f'Semantic error: Incompatible parameter type. Expected '
                       f'{param_type}, found {val_type} at {ctx.start.line}:{ctx.start.column}')
                 exit()
+            self.param_index[-1] = self.param_index[-1] - 1
 
 
     # Enter a parse tree produced by PpParser#if0.
@@ -883,12 +891,14 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#value1.
     def enterValue1(self, ctx:PpParser.Value1Context):
-        pass
+        if len(ctx.expression0()) > 0:
+            self.quadruples[-1].push_operator('(')
 
     # Exit a parse tree produced by PpParser#value1.
     def exitValue1(self, ctx:PpParser.Value1Context):
         if len(ctx.expression0()) == 0:
             return
+        self.quadruples[-1].pop_operator()
         index2 = self.quadruples[-1].pop_operand()
         index2_type = self.quadruples[-1].pop_type()
         index1 = self.quadruples[-1].pop_operand()
@@ -1021,12 +1031,26 @@ class PpListener(ParseTreeListener):
 
     # Enter a parse tree produced by PpParser#stat_functions0.
     def enterStat_functions0(self, ctx:PpParser.Stat_functions0Context):
-        pass
+        self.quadruples[-1].push_operator('(')
 
     # Exit a parse tree produced by PpParser#stat_functions0.
     def exitStat_functions0(self, ctx:PpParser.Stat_functions0Context):
-        pass
+        self.quadruples[-1].pop_operator()
 
+    def matrix_functions(self, func, return_type, ctx, only_numeric = False):
+        val = self.quadruples[-1].pop_operand()
+        val_type = self.quadruples[-1].pop_type()
+        if val_type.struct_type != StructuredTypes.MATRIX:
+            print(f"Semantic Error: Cannot get {func} non matrix type at {ctx.start.line}:{ctx.start.column}")
+            exit()
+        if only_numeric and val_type.basic_type not in {BasicTypes.INT, BasicTypes.FLOAT}:
+            print(f"Semantic Error: Cannot get {func} of non numeric type at {ctx.start.line}:{ctx.start.column}")
+            exit()
+        temp_type = return_type(val_type)
+        temp = self.quadruples[-1].new_temp_register(temp_type)
+        self.quadruples[-1].add_quadruple(func, val, None, temp)
+        self.quadruples[-1].push_operand(temp)
+        self.quadruples[-1].push_type(temp_type)
 
     # Enter a parse tree produced by PpParser#mean0.
     def enterMean0(self, ctx:PpParser.Mean0Context):
@@ -1034,7 +1058,12 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#mean0.
     def exitMean0(self, ctx:PpParser.Mean0Context):
-        pass
+        self.matrix_functions(
+            "mean",
+            (lambda _: Type(BasicTypes.FLOAT, StructuredTypes.NONE)),
+            ctx,
+            only_numeric = True
+        )
 
 
     # Enter a parse tree produced by PpParser#median0.
@@ -1043,7 +1072,12 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#median0.
     def exitMedian0(self, ctx:PpParser.Median0Context):
-        pass
+        self.matrix_functions(
+            "median",
+            (lambda _: Type(BasicTypes.FLOAT, StructuredTypes.NONE)),
+            ctx,
+            only_numeric = True
+        )
 
 
     # Enter a parse tree produced by PpParser#mode0.
@@ -1052,7 +1086,11 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#mode0.
     def exitMode0(self, ctx:PpParser.Mode0Context):
-        pass
+        self.matrix_functions(
+            "mode",
+            (lambda val_type: Type(val_type.basic_type, StructuredTypes.NONE)),
+            ctx
+        )
 
 
     # Enter a parse tree produced by PpParser#stdev0.
@@ -1061,7 +1099,12 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#stdev0.
     def exitStdev0(self, ctx:PpParser.Stdev0Context):
-        pass
+        self.matrix_functions(
+            "stdev",
+            (lambda _: Type(BasicTypes.FLOAT, StructuredTypes.NONE)),
+            ctx,
+            only_numeric = True
+        )
 
 
     # Enter a parse tree produced by PpParser#variance0.
@@ -1070,26 +1113,25 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#variance0.
     def exitVariance0(self, ctx:PpParser.Variance0Context):
-        pass
+        self.matrix_functions(
+            "variance",
+            (lambda _: Type(BasicTypes.FLOAT, StructuredTypes.NONE)),
+            ctx,
+            only_numeric = True
+        )
 
 
     # Enter a parse tree produced by PpParser#transpose0.
     def enterTranspose0(self, ctx:PpParser.Transpose0Context):
-        self.quadruples[-1].push_operator('(')
+        pass
 
     # Exit a parse tree produced by PpParser#transpose0.
     def exitTranspose0(self, ctx:PpParser.Transpose0Context):
-        val = self.quadruples[-1].pop_operand()
-        val_type = self.quadruples[-1].pop_type()
-        if val_type.struct_type != StructuredTypes.MATRIX:
-            print(f"Semantic Error: Cannot transpose non matrix type at {ctx.start.line}:{ctx.start.column}")
-            exit()
-        temp_type = Type(val_type.basic_type, val_type.struct_type, val_type.cols, val_type.rows)
-        temp = self.quadruples[-1].new_temp_register(temp_type)
-        self.quadruples[-1].add_quadruple("transpose", val, None, temp)
-        self.quadruples[-1].push_operand(temp)
-        self.quadruples[-1].push_type(temp_type)
-        self.quadruples[-1].pop_operator()
+        self.matrix_functions(
+            "transpose",
+            (lambda val_type: Type(val_type.basic_type, val_type.struct_type, val_type.cols, val_type.rows)),
+            ctx
+        )
 
 
     # Enter a parse tree produced by PpParser#beta0.
