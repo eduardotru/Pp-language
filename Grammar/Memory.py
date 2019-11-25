@@ -42,10 +42,10 @@ class Memory:
         elif address >= self.memory_repr.stringRange[0] and address <= self.memory_repr.stringRange[1]:
             self.strings[address - self.memory_repr.stringRange[0]] = str(value)
         elif address >= self.memory_repr.matIntRange[0] and address <= self.memory_repr.matIntRange[1]:
-            self.matInts[address - self.memory_repr.matIntRange[0]] = np.copy(value)
+            self.matInts[address - self.memory_repr.matIntRange[0]] = value.astype(int)
         elif address >= self.memory_repr.matFloatRange[0] and address <= self.memory_repr.matFloatRange[1]:
-            self.matFloats[address - self.memory_repr.matFloatRange[0]] = np.copy(value)
+            self.matFloats[address - self.memory_repr.matFloatRange[0]] = value.astype(float)
         elif address >= self.memory_repr.matBoolRange[0] and address <= self.memory_repr.matBoolRange[1]:
-            self.matBools[address - self.memory_repr.matBoolRange[0]] = np.copy(value)
+            self.matBools[address - self.memory_repr.matBoolRange[0]] = value.astype(bool)
         elif address >= self.memory_repr.matStringRange[0] and address <= self.memory_repr.matStringRange[1]:
-            self.matStrings[address - self.memory_repr.matStringRange[0]] = np.copy(value)
+            self.matStrings[address - self.memory_repr.matStringRange[0]] = value.astype(str)

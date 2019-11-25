@@ -1,3 +1,5 @@
+import numpy as np
+
 from Memory import Memory
 from MemoryGenerator import MemoryGenerator
 
@@ -88,7 +90,7 @@ class VirtualMachine:
         elif op == "-":
             self.daw(self.dar(left) - self.dar(right), res)
         elif op == "*":
-            self.daw(self.dar(left) * self.dar(right), res)
+            self.daw(np.dot(self.dar(left), self.dar(right)), res)
         elif op == "/":
             self.daw(self.dar(left) / self.dar(right), res)
         elif op == "%":

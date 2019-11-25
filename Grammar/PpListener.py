@@ -904,7 +904,17 @@ class PpListener(ParseTreeListener):
         for i in range(rows):
             for j in range(cols):
                 temp_mat_elem = self.quadruples[-1].new_temp_register(Type(basic_type.basic_type, StructuredTypes.NONE))
-                self.quadruples[-1].add_quadruple(temp_mat, i, j, temp_mat_elem)
+                int_type = Type(BasicTypes.INT, StructuredTypes.NONE)
+            
+                if not self.symbols_table.exists_constant(i):
+                    self.symbols_table.add_constant(i, int_type)
+
+                i_address = self.symbols_table.constant_to_dir(i)
+                if not self.symbols_table.exists_constant(j):
+                    self.symbols_table.add_constant(j, int_type)
+
+                j_address = self.symbols_table.constant_to_dir(j)
+                self.quadruples[-1].add_quadruple(temp_mat, i_address, j_address, temp_mat_elem)
                 self.quadruples[-1].add_quadruple("=", self.matrix_literal[i][j][0], None, temp_mat_elem)
         self.quadruples[-1].push_operand(temp_mat)
         self.quadruples[-1].push_type(temp_type)
