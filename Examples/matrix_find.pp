@@ -22,8 +22,7 @@ i = 0;
 while (i < 4) {
     j = 0;
     while (j < 4) {
-        read(aux);
-        mat[i][j] = aux;
+        read(mat[i][j]);
         j = j + 1;
     }
     i = i + 1;

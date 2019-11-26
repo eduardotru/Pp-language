@@ -134,11 +134,10 @@ io_statement0 :
   | plot0
   | hist0
   | showplot0
-  | readcsv0
   ;
 
 input0 :
-  'read' '(' ID ')' ';'
+  'read' '(' value0 ')' ';'
   ;
 
 output0 :
@@ -155,10 +154,6 @@ hist0 :
 
 showplot0 :
   'showplot' '(' ')' ';'
-  ;
-
-readcsv0 :
-  'readcsv' '(' ID ')' ';'
   ;
 
 return0 :
@@ -274,12 +269,6 @@ sign0 :
 type0 :
   basic_type0
   | 'matrix' '<' basic_type0 '>' '[' INT_NUMBER ']' '[' INT_NUMBER ']'
-  | 'dataset' '<' basic_type0 type1 '>'
-  ;
-
-type1 :
-  ',' basic_type0 type1
-  | // empty
   ;
 
 basic_type0 :
