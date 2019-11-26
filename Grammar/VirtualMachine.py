@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from Memory import Memory
 from MemoryGenerator import MemoryGenerator
+from StatFunctions import StatFunctions
 
 
 class VirtualMachine:
@@ -164,6 +165,9 @@ class VirtualMachine:
             y = self.dar(right)
             fmt = self.dar(res)
             plt.plot(x.flatten(), y.flatten(), fmt)
+        elif op == "hist":
+            x = self.dar(left)
+            plt.hist(x.flatten(), bins=30)
         elif op == "showplot":
             plt.show()
         elif op == "transpose":
@@ -193,6 +197,11 @@ class VirtualMachine:
             self.matrices_calls[-1][res] = (mat, index1, index2)
         elif op == "-u":
             self.daw(-self.dar(left), res)
+        elif op == "stat_func":
+            params = []
+            for _ in range(int(right)):
+                params.append(self.paramStack.pop())
+            self.daw(StatFunctions.execute(left, params), res)
         else:
             return False
         return True

@@ -18,6 +18,9 @@ WS : [\t\r\n ]+ -> skip ;
 
 // Grammar
 
+LINE_COMMENT : '//' ~[\r\n]* -> skip
+  ;
+
 program0 :
   variable_decl0 program1
   | program1
