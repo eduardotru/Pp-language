@@ -124,7 +124,10 @@ class PpListener(ParseTreeListener):
     def enterFunction_decl0(self, ctx:PpParser.Function_decl0Context):
         self.current_scope = ctx.ID().getText()
         self.func_name = ctx.ID().getText()
-        self.func_type = self.get_type(ctx.type0())
+        if ctx.function_type0().getText() == "void":
+            self.func_type = Type(BasicTypes.VOID, StructuredTypes.NONE)
+        else:
+            self.func_type = self.get_type(ctx.function_type0().type0())
         self.func_parameters = []
         self.quadruples.append(Quadruples())
     
@@ -136,7 +139,13 @@ class PpListener(ParseTreeListener):
         self.quadruples.pop()
         self.current_scope = GLOBAL_SCOPE
         
+    # Enter a parse tree produced by PpParser#function_type0.
+    def enterFunction_type0(self, ctx:PpParser.Function_type0Context):
+        pass
 
+    # Exit a parse tree produced by PpParser#function_type0.
+    def exitFunction_type0(self, ctx:PpParser.Function_type0Context):
+        pass
 
     # Enter a parse tree produced by PpParser#decl_block0.
     def enterDecl_block0(self, ctx:PpParser.Decl_block0Context):
@@ -483,7 +492,6 @@ class PpListener(ParseTreeListener):
     def exitReadcsv0(self, ctx:PpParser.Readcsv0Context):
         pass
 
-
     # Enter a parse tree produced by PpParser#return0.
     def enterReturn0(self, ctx:PpParser.Return0Context):
         pass
@@ -500,9 +508,6 @@ class PpListener(ParseTreeListener):
             print(f'Semantic error: Incompatible return type. Expected {return_type} '
                   f'got {val_type} at {ctx.start.line}:{ctx.start.column}')
             exit()
-            
-        
-
 
     # Enter a parse tree produced by PpParser#expression0.
     def enterExpression0(self, ctx:PpParser.Expression0Context):
@@ -849,7 +854,21 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#numeric_term1.
     def exitNumeric_term1(self, ctx:PpParser.Numeric_term1Context):
-        pass
+        if self.quadruples[-1].has_operator() and self.quadruples[-1].top_operator() == "-u":
+            right = None
+            t_right =Type(BasicTypes.VOID, StructuredTypes.NONE)
+            left = self.quadruples[-1].pop_operand()
+            t_left = self.quadruples[-1].pop_type()
+            operator = self.quadruples[-1].pop_operator()
+            try:
+                t_result = self.semantic_cube.get(t_left, t_right, operator)
+                temp_register = self.quadruples[-1].new_temp_register(t_result)
+                self.quadruples[-1].add_quadruple(operator, left, right, temp_register)
+                self.quadruples[-1].push_operand(temp_register)
+                self.quadruples[-1].push_type(t_result)
+            except Exception:
+                print(f'Semantic error: Incompatible types on operation {operator}{t_left} at {ctx.start.line}:{ctx.start.column}')
+                exit()
 
 
     # Enter a parse tree produced by PpParser#sign0.
@@ -858,8 +877,8 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#sign0.
     def exitSign0(self, ctx:PpParser.Sign0Context):
-        pass
-
+        if ctx.getText() == "-":
+            self.quadruples[-1].push_operator("-u") # unary minus sign
 
     # Enter a parse tree produced by PpParser#type0.
     def enterType0(self, ctx:PpParser.Type0Context):
@@ -1449,5 +1468,3 @@ class PpListener(ParseTreeListener):
     # Exit a parse tree produced by PpParser#runif0.
     def exitRunif0(self, ctx:PpParser.Runif0Context):
         self.stat_function_call("runif", 2)
-
-

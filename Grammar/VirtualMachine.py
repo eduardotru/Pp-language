@@ -100,7 +100,8 @@ class VirtualMachine:
             self.daw(self.dar(left) % self.dar(right), res)
         elif op == "^":
             if isinstance(self.dar(left), np.ndarray):
-                self.daw(np.linalg.matrix_power(self.dar(left), self.dar(right)), res)
+                self.daw(np.linalg.matrix_power(
+                    self.dar(left), self.dar(right)), res)
             else:
                 self.daw(self.dar(left) ** self.dar(right), res)
         elif op == "=":
@@ -190,7 +191,8 @@ class VirtualMachine:
             self.daw(mat[index1][index2], res)
             res = int(res)
             self.matrices_calls[-1][res] = (mat, index1, index2)
-
+        elif op == "-u":
+            self.daw(-self.dar(left), res)
         else:
             return False
         return True

@@ -47,7 +47,12 @@ block1 :
   ;
 
 function_decl0 :
-  'func' type0 ID '(' parameters_or_empty0 ')' decl_block0
+  'func' function_type0 ID '(' parameters_or_empty0 ')' decl_block0
+  ;
+
+function_type0 :
+  'void'
+  | type0
   ;
 
 decl_block0 :

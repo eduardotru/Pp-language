@@ -50,6 +50,9 @@ class SemanticCube:
         for matrix_int_op in self.MATRIX_INT_OPERATORS:
             self.cube[StructuredTypes.MATRIX][BasicTypes.INT][matrix_int_op] = StructuredTypes.MATRIX
 
+        self.cube[BasicTypes.INT][BasicTypes.VOID]["-u"] = BasicTypes.INT
+        self.cube[BasicTypes.FLOAT][BasicTypes.VOID]["-u"] = BasicTypes.FLOAT
+
     def _initialize_cube(self):
         supported_types = [BasicTypes.BOOL, BasicTypes.INT,
                            BasicTypes.FLOAT, StructuredTypes.MATRIX, BasicTypes.VOID]

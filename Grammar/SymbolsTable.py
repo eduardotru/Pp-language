@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from MemoryGenerator import MemoryRepresentation
 
+
 class BasicTypes(Enum):
     BOOL = "bool"
     STRING = "string"
@@ -49,41 +50,47 @@ class Function:
             var.memory_dir
             for var in self.variables.values()
             if var.type.basic_type == basic_type and
-                var.type.struct_type == struct_type
+            var.type.struct_type == struct_type
         ]
 
     def encode_matrix_data(self, basic_type):
         matrix_dirs = self.get_dirs(basic_type, StructuredTypes.MATRIX)
-        matrices = [var for var in self.variables.values() if var.memory_dir in matrix_dirs]
+        matrices = [var for var in self.variables.values()
+                    if var.memory_dir in matrix_dirs]
         matrices.sort(key=(lambda x: x.memory_dir))
         return [(matrix.type.rows, matrix.type.cols) for matrix in matrices]
-    
+
     def encode(self):
         return MemoryRepresentation(
-            [   min(self.get_dirs(BasicTypes.INT, StructuredTypes.NONE), default=0),
+            [min(self.get_dirs(BasicTypes.INT, StructuredTypes.NONE), default=0),
                 max(self.get_dirs(BasicTypes.INT, StructuredTypes.NONE), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.NONE), default=0),
-                max(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.NONE), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.BOOL, StructuredTypes.NONE), default=0),
+             ],
+            [min(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.NONE), default=0),
+                max(self.get_dirs(BasicTypes.FLOAT,
+                                  StructuredTypes.NONE), default=-1)
+             ],
+            [min(self.get_dirs(BasicTypes.BOOL, StructuredTypes.NONE), default=0),
                 max(self.get_dirs(BasicTypes.BOOL, StructuredTypes.NONE), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.STRING, StructuredTypes.NONE), default=0),
-                max(self.get_dirs(BasicTypes.STRING, StructuredTypes.NONE), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.INT, StructuredTypes.MATRIX), default=0),
+             ],
+            [min(self.get_dirs(BasicTypes.STRING, StructuredTypes.NONE), default=0),
+                max(self.get_dirs(BasicTypes.STRING,
+                                  StructuredTypes.NONE), default=-1)
+             ],
+            [min(self.get_dirs(BasicTypes.INT, StructuredTypes.MATRIX), default=0),
                 max(self.get_dirs(BasicTypes.INT, StructuredTypes.MATRIX), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.MATRIX), default=0),
-                max(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.MATRIX), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.BOOL, StructuredTypes.MATRIX), default=0),
-                max(self.get_dirs(BasicTypes.BOOL, StructuredTypes.MATRIX), default=-1)
-            ],
-            [   min(self.get_dirs(BasicTypes.STRING, StructuredTypes.MATRIX), default=0),
-                max(self.get_dirs(BasicTypes.STRING, StructuredTypes.MATRIX), default=-1)
-            ],
+             ],
+            [min(self.get_dirs(BasicTypes.FLOAT, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.FLOAT,
+                                  StructuredTypes.MATRIX), default=-1)
+             ],
+            [min(self.get_dirs(BasicTypes.BOOL, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.BOOL,
+                                  StructuredTypes.MATRIX), default=-1)
+             ],
+            [min(self.get_dirs(BasicTypes.STRING, StructuredTypes.MATRIX), default=0),
+                max(self.get_dirs(BasicTypes.STRING,
+                                  StructuredTypes.MATRIX), default=-1)
+             ],
             self.encode_matrix_data(BasicTypes.INT),
             self.encode_matrix_data(BasicTypes.FLOAT),
             self.encode_matrix_data(BasicTypes.BOOL),
@@ -271,6 +278,8 @@ class SymbolsTable:
         if self.exists_variable(name, scope):
             if name in self.functions[scope].variables:
                 return self.functions[scope].variables[name].memory_dir
+            else:
+                return self.functions["program"].variables[name].memory_dir
         else:
             raise Exception("Variable does not exist in this scope.")
 
@@ -279,6 +288,8 @@ class SymbolsTable:
         if self.exists_variable(name, scope):
             if name in self.functions[scope].variables:
                 return self.functions[scope].variables[name].type
+            else:
+                return self.functions["program"].variables[name].type
         else:
             raise Exception("Variable does not exist in this scope.")
 
