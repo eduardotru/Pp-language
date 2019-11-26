@@ -302,6 +302,11 @@ class PpListener(ParseTreeListener):
             self.quadruples[-1].add_quadruple("=", "retVal", None, temp_ret)
             self.quadruples[-1].push_operand(temp_ret)
             self.quadruples[-1].push_type(temp_type)
+        if self.param_index[-1] > 0:
+            print(f"Semantic Error: Function {self.function_call_stack[-1]} expecting "
+                  f"{self.symbols_table.get_function_num_params(ctx.ID().getText())} "
+                  f"at {ctx.start.line}:{ctx.start.column}"
+            )
         self.param_index.pop()
         self.function_call_stack.pop()
         self.quadruples[-1].pop_operator()
