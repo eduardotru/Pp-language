@@ -1,5 +1,5 @@
-let asd a, b, c
+let int a;
 
 func a(int b, c) {
-    pinrt(a);
+    pinrt(a)
 }
