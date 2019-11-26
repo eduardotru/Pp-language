@@ -303,10 +303,9 @@ class PpListener(ParseTreeListener):
             self.quadruples[-1].push_operand(temp_ret)
             self.quadruples[-1].push_type(temp_type)
         if self.param_index[-1] > 0:
-            print(f"Semantic Error: Function {self.function_call_stack[-1]} expecting "
-                  f"{self.symbols_table.get_function_num_params(ctx.ID().getText())} "
-                  f"at {ctx.start.line}:{ctx.start.column}"
-            )
+            print(f"Semantic error: Incorrect number of parameters given to {self.function_call_stack[-1]}"
+                  f" at {ctx.start.line}:{ctx.start.column}")
+            exit()
         self.param_index.pop()
         self.function_call_stack.pop()
         self.quadruples[-1].pop_operator()
@@ -322,6 +321,7 @@ class PpListener(ParseTreeListener):
             if self.param_index[-1] < 0:
                 print(f"Semantic error: Incorrect number of parameters given to {self.function_call_stack[-1]}"
                       f" at {ctx.start.line}:{ctx.start.column}")
+                exit()
 
             val = self.quadruples[-1].pop_operand()
             val_type = self.quadruples[-1].pop_type()
@@ -504,7 +504,7 @@ class PpListener(ParseTreeListener):
             self.semantic_cube.get(return_type, val_type, "=")
             self.quadruples[-1].add_quadruple("return", None, None, val)
         except Exception:
-            print(f'Semantic error: Incompatible return type. Expected {return_type} '
+            print(f'Semantic error: Incompatible return type. Expected {return_type}, '
                   f'got {val_type} at {ctx.start.line}:{ctx.start.column}')
             exit()
 
@@ -960,7 +960,7 @@ class PpListener(ParseTreeListener):
         basic_type = self.matrix_literal[0][0][1]
         for arr in self.matrix_literal:
             if cols != len(arr):
-                print(f"Semantic error: Matrix literal has extranous dimensions "
+                print(f"Semantic error: Matrix literal has extraneous dimensions "
                       f"at {ctx.start.line}:{ctx.start.column}")
                 exit()
             for _, elem_type in arr:
@@ -1064,7 +1064,7 @@ class PpListener(ParseTreeListener):
         val = self.quadruples[-1].pop_operand()
         val_type = self.quadruples[-1].pop_type()
         if val_type.struct_type != StructuredTypes.MATRIX:
-            print(f"Semantic Error: Cannot get {func} non matrix type at {ctx.start.line}:{ctx.start.column}")
+            print(f"Semantic Error: Cannot get {func} of non matrix type at {ctx.start.line}:{ctx.start.column}")
             exit()
         if only_numeric and val_type.basic_type not in {BasicTypes.INT, BasicTypes.FLOAT}:
             print(f"Semantic Error: Cannot get {func} of non numeric type at {ctx.start.line}:{ctx.start.column}")
