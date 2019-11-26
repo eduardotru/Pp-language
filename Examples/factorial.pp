@@ -18,18 +18,3 @@ if (fact < 0) {
 } else {
   write(factorial(fact));
 }
-
-write("Recursive Factorial");
-
-func int rec_factorial (int n) {
-  let int res;
-  if (n == 0) {
-    write(1);
-    return 1;
-  }
-  res = rec_factorial(n - 1)*n;
-  write(res);
-  return res;
-}
-
-rec_factorial(fact);
