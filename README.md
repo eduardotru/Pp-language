@@ -1,6 +1,9 @@
 # Pp Programming language
 Pp is a programming language for scientific use. It overloads basic operations over matrices and has builtin function for probability distributions, statistic analysis, and plotting. 
 Pp was codeveloped by Eduardo Trujillo and Hugo Garcia for the compilers class at ITESM.
+
+[Video Tutorial!](https://www.loom.com/share/9d9bebcab6ae48cbbc591478bc063ca3)
+
 ## Installation Requirements
 For the correct functioning of Pp the following tools are required:
 - Python3
