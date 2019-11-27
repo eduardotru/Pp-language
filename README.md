@@ -7,6 +7,15 @@ For the correct functioning of Pp the following tools are required:
 - Numpy
 - Scipy
 - Matplotlib
+## How to run Pp
+Pp was built using Python3 so you can compile Pp code with the following command:
+
+```$ python3 /path/to/Pp/Grammar/Pp.py filename.pp```
+
+When compiled, Pp code generates 2 files which must always live in the same directory. They are a .json file and a .ppo file. To execute this files you need to run the following command:
+
+```$ python3 /path/to/Pp/Grammar/PpRun.py filename```
+
 ## How to write Pp
 ### Basics
 #### Data types
