@@ -16,6 +16,12 @@ When compiled, Pp code generates 2 files which must always live in the same dire
 
 ```$ python3 /path/to/Pp/Grammar/PpRun.py filename```
 
+To make it easier to use the compiler and virtual machine you can create the following aliases
+```
+$ alias pp_compile='python3 /path/to/Pp/Grammar/Pp.py'
+$ alias pp_run='python3 /path/to/Pp/Grammar/PpRun.py'
+```
+
 ## How to write Pp
 ### Basics
 #### Data types
