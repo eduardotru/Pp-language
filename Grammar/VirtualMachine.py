@@ -27,9 +27,13 @@ class VirtualMachine:
         self.matrices_calls = [{}]
 
     def parse_quadruples(self):
-        with open(self.filename + ".ppo", 'r') as f:
-            for line in f.readlines():
-                self.quadruples.append(line.split())
+        try:
+            with open(self.filename + ".ppo", 'r') as f:
+                for line in f.readlines():
+                    self.quadruples.append(line.split())
+        except Exception:
+            print(f"Error: File {self.filename}.ppo not found")
+            exit()
 
     def expand_activation_record(self, func):
         self.functionLocalStack.append(

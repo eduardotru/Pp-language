@@ -63,8 +63,12 @@ class MemoryGenerator:
 
     @staticmethod
     def decode(filename):
-        with open(filename, 'r') as f:
-            content = json.load(f)
+        try:
+            with open(filename, 'r') as f:
+                content = json.load(f)
+        except:
+            print(f"Error: File {filename} not found or not a JSON")
+            exit()
         for func in content["functions"].keys():
             content["functions"][func]["locals"] = MemoryRepresentation(**content["functions"][func]["locals"])
             content["functions"][func]["temps"] = MemoryRepresentation(**content["functions"][func]["temps"])
