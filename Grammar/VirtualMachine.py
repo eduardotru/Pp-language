@@ -141,7 +141,11 @@ class VirtualMachine:
         elif op == "not":
             self.daw(not self.dar(left), res)
         elif op == "read":
-            self.daw(input(), res)
+            try:
+                self.daw(input(), res)
+            except Exception:
+                print("Error: Invalid input")
+                exit()
         elif op == "write":
             print(self.dar(res))
         elif op == "goto":
