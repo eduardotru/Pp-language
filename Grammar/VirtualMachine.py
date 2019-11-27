@@ -15,7 +15,7 @@ class VirtualMachine:
         self.instructionPointer = [0]
         self.functionLocalStack = []
         self.functionTempStack = []
-        self.retVal = None
+        self.retVal = 0
         self.paramStack = []
         self.parse_quadruples()
         self.memory = MemoryGenerator.decode(self.filename + ".json")

@@ -317,7 +317,7 @@ class PpListener(ParseTreeListener):
 
     # Exit a parse tree produced by PpParser#function_call_aux1.
     def exitFunction_call_aux1(self, ctx:PpParser.Function_call_aux1Context):
-        if ctx.expression0() is not None:
+        if ctx.expression0() is not None and ctx.expression0().getText() != "":
             if self.param_index[-1] < 0:
                 print(f"Semantic error: Incorrect number of parameters given to {self.function_call_stack[-1]}"
                       f" at {ctx.start.line}:{ctx.start.column}")
