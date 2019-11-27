@@ -96,13 +96,21 @@ class VirtualMachine:
         elif op == "*":
             self.daw(np.dot(self.dar(left), self.dar(right)), res)
         elif op == "/":
-            self.daw(self.dar(left) / self.dar(right), res)
+            try:
+                self.daw(self.dar(left) / self.dar(right), res)
+            except Exception:
+                print("Division by zero")
+                exit()
         elif op == "%":
             self.daw(self.dar(left) % self.dar(right), res)
         elif op == "^":
             if isinstance(self.dar(left), np.ndarray):
-                self.daw(np.linalg.matrix_power(
-                    self.dar(left), self.dar(right)), res)
+                try:
+                    self.daw(np.linalg.matrix_power(
+                        self.dar(left), self.dar(right)), res)
+                except Exception:
+                    print("Matrix does not have inverse")
+                    exit()
             else:
                 self.daw(self.dar(left) ** self.dar(right), res)
         elif op == "=":
